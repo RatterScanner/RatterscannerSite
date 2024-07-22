@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>File and Text Input</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #111827;
+			height: 100%;
+			margin: 0;
+		}
+		
+		.container {
+			max-width: 400px;
+			margin: 40px auto;
+			padding: 20px;
+			background-color: #1f2937;
+			border-radius: 10px;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+		}
+		
+		.input-group {
+			margin-bottom: 20px;
+		}
+		
+		.input-group label {
+			display: block;
+			margin-bottom: 10px;
+			color: #fff;
+		}
+		
+		.input-group input[type="file"] {
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			color: #fff;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		
+		.input-group input[type="text"] {
+			padding: 10px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			color: #000000;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		
+		.input-group input[type="file"]:focus,.input-group input[type="text"]:focus {
+			border-color: #337ab7;
+			box-shadow: 0 0 10px rgba(51, 122, 187, 0.5);
+		}
+		
+		.button {
+			background-color: #337ab7;
+			color: #fff;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+		}
+		
+		.button:hover {
+			background-color: #23527c;
+		}
+
+        .white {
+			color: #fff;
+        }
+		
+		.dark-blue {
+			color: #23527c;
+		}
+	</style>
+	<script>
+		function checkForm() {
+			var fileInput = document.getElementById('file');
+			var textInput = document.getElementById('text');
+			
+			if (fileInput.files.length > 0 && textInput.value!== '') {
+				alert('You cannot upload a file and check an ID at the same time');
+			} else if (fileInput.files.length > 0) {
+				alert("Not implemented yet")
+			} else if (textInput.value == "") {
+				alert("You must supply a file or an ID") 
+			}else if (textInput.value!== '') {
+				window.location.href = '/report?appID=' + textInput.value;
+			}
+		}
+		function clearFileInput() {
+			document.getElementById('file').value = '';
+		}
+	</script>
+</head>
+<body>
+	<div class="container">
+		<h2 class="white">Upload a file or view an ID</h2>
+		<form onsubmit="return false;">
+			<div class="input-group">
+				<label for="file" style="color: #fff;">Select a file:</label>
+				<input type="file" id="file" name="file">
+				<button type="button" onclick="clearFileInput()">Clear file</button> <!--This needs to look a lot better, but works for now-->
+			</div>
+			<div class="input-group">
+				<label for="text" style="color: #fff;">Enter an ID:</label>
+				<input type="text" id="text" name="text">
+			</div>
+			<button class="button dark-blue" style="color: #fff;" onclick="checkForm()">Submit</button>
+		</form>
+	</div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>File and Text Input</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #111827;
+			height: 100%;
+			margin: 0;
+		}
+
+        .center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 5vh;
+        }
+
+       .white {
+            color: #fff;
+        }
+
+        .flag-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+            margin-left: 30px;
+        }
+
+        .flag {
+            margin: 10px;
+            padding: 0;
+            border-radius: 5px;
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .flag-color {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            border-radius: 5px 0 0 5px; 
+            z-index: 1;
+        }
+
+        .container {
+            padding-left: 10px;
+            background-color: #1f2937;
+            border-radius: 5px;
+            padding: 20px;
+        }
+
+        .critical .flag-color {
+            background-color: red;
+        }
+
+        .warning .flag-color {
+            background-color: rgb(212, 212, 7);
+        }
+
+        .safe .flag-color { /*This is not needed anymore*/
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <% if (!(locals.completed)) { %>
+        <div class="center">
+        <img src=<%= locals.gifName || "Loading" %> alt="loading"> <br/~>
+        </div>
+    <% } else { %>
+        <div class="center white">
+            <h2>Report for ID: <%= locals.appID %> </h2>
+        </div>
+        <div style="margin: 10px;" class="white">
+            <h3>Static analysis: <br/></h3>
+        </div>
+        <% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+            <% if (flag.level >= 1) { %> <!--Repeating code >:( there is probbly a better way to do this-->
+                <% if (flag.level == 5) { %>
+                    <div class="flag critical">
+                        <div class="flag-color"></div>
+                        <div class="container">
+                         Known malicious software identified as: <%= flag.description %>
+                          <br/>
+                        </div>
+                    </div>
+                <% } else { %>  
+                    <div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+                        <div class="flag-color"></div>
+                        <div class="container">
+                        <%= flag.description %>
+                        <br/>
+                        </div>
+                    </div>
+                <% } %> 
+            <% } %>
+        <% }); %>
+    <% } %>
+    <div style="margin: 10px;" class="white">
+        <h3>Malicious connections: <br/></h3>
+    </div>
+    <div style="margin: 10px;" class="white">
+        <h3>Unknown connections: <br/></h3>
+    </div>
+    <div style="margin: 10px;" class="white">
+        <h3>File info: <br/></h3>
+    </div>
+</body>
+</html>
