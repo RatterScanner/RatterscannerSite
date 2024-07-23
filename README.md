@@ -1,0 +1,1 @@
+All you need to do is add the API key to key.txt and run it like any other node js application (node server.js) :)
