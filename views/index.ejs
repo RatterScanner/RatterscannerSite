@@ -76,21 +76,33 @@
 	</style>
 	<script>
 		function checkForm() {
-			var fileInput = document.getElementById('file');
-			var textInput = document.getElementById('text');
-			
-			if (fileInput.files.length > 0 && textInput.value!== '') {
-				alert('You cannot upload a file and check an ID at the same time');
-			} else if (fileInput.files.length > 0) {
-				alert("Not implemented yet")
-			} else if (textInput.value == "") {
-				alert("You must supply a file or an ID") 
-			}else if (textInput.value!== '') {
-				window.location.href = '/report?appID=' + textInput.value;
-			}
+		  var fileInput = document.getElementById('file');
+		  var textInput = document.getElementById('text');
+	  
+		  if (fileInput.files.length > 0 && textInput.value!== '') {
+			alert('You cannot upload a file and check an ID at the same time');
+		  } else if (fileInput.files.length > 0) {
+			const formData = new FormData();
+			formData.append('jarFile', fileInput.files[0]);
+			fetch("/upload", {
+			  method: 'POST',
+			  body: formData
+			})
+			.then(response => response.json())
+			.then(data => {
+			  const appID = data.appID;
+			  window.location.href = '/report?appID=' + appID;
+			})
+			.catch(error => console.error(error));
+		  } else if (textInput.value == "") {
+			alert("You must supply a file or an ID")
+		  } else if (textInput.value!== '') {
+			window.location.href = '/report?appID=' + textInput.value;
+		  }
 		}
+	  
 		function clearFileInput() {
-			document.getElementById('file').value = '';
+		  document.getElementById('file').value = '';
 		}
 	</script>
 </head>
