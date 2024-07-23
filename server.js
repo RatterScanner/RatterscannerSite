@@ -2,6 +2,8 @@ const express = require("express");
 const https = require("node:https");
 const multer = require("multer");
 const FormData = require('form-data');
+var svgCaptcha = require('svg-captcha');
+const fs = require('fs');
 
 const upload = multer();
 const app = express();
@@ -10,8 +12,18 @@ const loadingGifs = [];
 app.use(express.static("images"));
 app.set("view engine", "ejs");
 
+function readKeyFile() {
+    const file = 'key.txt';
+    const contents = fs.readFileSync(file, 'utf-8');
+    return contents;
+  }
+
 app.get("/", (req, res) => {
     res.render("index");
+})
+
+app.get("/favicon.ico", (req, res) => {
+    res.download(favicon)
 })
 
 app.get("/report", (req, res) => {
@@ -55,19 +67,26 @@ app.get("/report", (req, res) => {
 
 app.post("/upload", (req, res) => {
   const upload = multer({ storage: multer.memoryStorage() }); // Store the file in memory
-  const uploadMiddleware = upload.single('jarFile');
+  const uploadMiddleware = upload.single("jarFile");
+
 
   uploadMiddleware(req, res, (err) => {
     if (err) {
-      return res.status(500).send({ message: 'Error uploading file' });
+      return res.status(500).send({ message: "Error uploading file" });
     }
 
     const fileBuffer = req.file.buffer;
     const fileSize = req.file.size;
+    const key = readKeyFile();
+
+    if (key == null || key == ""){
+        console.log("ERROR key not read")
+        return res.status(500).send({ message: "Error key is null" });
+    }
 
     const formData = new FormData();
-    formData.append('file', fileBuffer, {
-      contentType: 'application/octet-stream',
+    formData.append("file", fileBuffer, {
+      contentType: "application/octet-stream",
       filename: req.file.originalname
     });
 
@@ -76,7 +95,7 @@ app.post("/upload", (req, res) => {
       hostname: "api.ratterscanner.com",
       path: "/jar_scanner",
       headers: Object.assign({
-        "api_key": "fdsfadsfjpioy231293u210io312ljnjlasd",
+        "api_key": key,
       }, formData.getHeaders())
     };
     let ID;
