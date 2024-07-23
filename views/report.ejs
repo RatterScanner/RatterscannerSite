@@ -21,13 +21,6 @@
             color: #fff;
         }
 
-        .flag-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: left;
-            margin-left: 30px;
-        }
-
         .flag {
             margin: 10px;
             padding: 0;
@@ -56,6 +49,17 @@
             padding: 20px;
         }
 
+        .standaloneContainer {
+            margin: 10px;
+            padding: 0;
+            border-radius: 5px;
+            color: #fff;
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: block;
+            position: relative;
+        }
+
         .critical .flag-color {
             background-color: red;
         }
@@ -64,10 +68,23 @@
             background-color: rgb(212, 212, 7);
         }
 
-        .safe .flag-color { /*This is not needed anymore*/
+        .safe .flag-color {
             background-color: green;
         }
     </style>
+    <script>
+        window.onload = function() {
+            let localsCompleted = <%= locals.completed %>;
+            let intervalId = setInterval(function() {
+                console.log("Checking")
+                if (localsCompleted) {
+                    clearInterval(intervalId);
+                } else {
+                    location.reload();
+                }
+            }, 10000); // check every 10 seconds
+        }
+    </script>
 </head>
 <body>
     <% if (!(locals.completed)) { %>
@@ -78,9 +95,23 @@
         <div class="center white">
             <h2>Report for ID: <%= locals.appID %> </h2>
         </div>
+
+        <% if (jsonReport.returnvalue.regex.flagsTriggered == "") { %>
+            <div class="center">
+                </br>
+                <div class="flag safe">
+                    <div class="flag-color"></div>
+                        <div class="container">
+                            The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            <% } %> 
         <div style="margin: 10px;" class="white">
             <h3>Static analysis: <br/></h3>
         </div>
+
         <% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
             <% if (flag.level >= 1) { %> <!--Repeating code >:( there is probbly a better way to do this-->
                 <% if (flag.level == 5) { %>
@@ -102,15 +133,53 @@
                 <% } %> 
             <% } %>
         <% }); %>
+
+        <div style="margin: 10px;" class="white">
+            <h3>Malicious connections: <br/></h3>
+        </div>
+
+        <% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>  
+            <div class="flag critical">
+                <div class="flag-color"></div>
+                <div class="container">
+                    <%= flag %>
+                    <br/>
+                </div>
+            </div>
+        <% }); %>
+
+        <div style="margin: 10px;" class="white">
+            <h3>Unknown connections: <br/></h3>
+        </div>
+
+        <% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>  
+            <div class="flag warning">
+                <div class="flag-color"></div>
+                <div class="container">
+                    <%= flag %>
+                    <br/>
+                </div>
+            </div>
+        <% }); %>      
+
+        <div style="margin: 10px;" class="white">
+            <h3>File info: <br/></h3>
+        </div>
+
+        <div class="standaloneContainer">
+            File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %> 
+        </div>
+        
+        <div class="standaloneContainer">
+            SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %> </br>
+            MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %> </br>
+            SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %> </br>
+        </div>
+
+        <div class="standaloneContainer">
+          Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>><%= jsonReport.returnvalue.regex.fileProperties.downloadLink %></a> 
+        </div>
+
     <% } %>
-    <div style="margin: 10px;" class="white">
-        <h3>Malicious connections: <br/></h3>
-    </div>
-    <div style="margin: 10px;" class="white">
-        <h3>Unknown connections: <br/></h3>
-    </div>
-    <div style="margin: 10px;" class="white">
-        <h3>File info: <br/></h3>
-    </div>
 </body>
 </html>
