@@ -152,14 +152,14 @@
 				<button type="button" onclick="clearFileInput()">Clear file</button>
 				<!--This needs to look a lot better, but works for now-->
 			</div>
+			<div class="white">
+				<div id="captcha-container"></div>
+				<label for="capAnswer">Solve the captcha above (case sensitive):</label>
+				<input type="text" id="capAnswer" name="capAnswer"><br><br>
+			</div>
 			<div class="input-group">
 				<label for="text" style="color: #fff;">Enter an ID:</label>
 				<input type="text" id="text" name="text">
-			</div>
-			<div class="white">
-				<div id="captcha-container"></div>
-				<label for="capAnswer">Enter the text above (case sensitive):</label>
-				<input type="text" id="capAnswer" name="capAnswer"><br><br>
 			</div>
 			<button class="button dark-blue" style="color: #fff;" onclick="checkForm()">Submit</button>
 		</form>
