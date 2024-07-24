@@ -1,185 +1,299 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>File and Text Input</title>
+	<title>RatterScanner | Scan report</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="https://ratterscanner.com/favicon.ico">
+	<link rel="manifest" href="https://ratterscanner.com/manifest.json">
+	<link rel="apple-touch-icon" href="https://ratterscanner.com/logo192.png">
+
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="RatterScanner | Scan report">
+	<meta property="og:description" content="Results for the analysis of ID <%= locals.appID %>">
+	<meta property="og:color" content="#ff7878">
+
 	<style>
 		body {
 			font-family: Arial, sans-serif;
 			background-color: #111827;
 			height: 100%;
-			margin: 0;
+			margin-left: 10px;
 		}
 
-        .center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 5vh;
-        }
+		.center {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
 
-       .white {
-            color: #fff;
-        }
+		.white {
+			color: #fff;
+		}
 
-        .flag {
-            margin: 10px;
-            padding: 0;
-            border-radius: 5px;
-            color: #fff;
-            margin-top: 0;
-            margin-bottom: 10px;
-            display: inline-block;
-            position: relative;
-        }
+		.flags {
+			margin-top: 10px;
+		}
 
-        .flag-color {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 10px;
-            border-radius: 5px 0 0 5px; 
-            z-index: 1;
-        }
+		.flag {
+			margin: 10px;
+			padding: 0;
+			border-radius: 5px;
+			color: #fff;
+			margin-top: 0;
+			margin-bottom: 10px;
+			display: inline-block;
+			position: relative;
+		}
 
-        .container {
-            padding-left: 10px;
-            background-color: #1f2937;
-            border-radius: 5px;
-            padding: 20px;
-        }
+		.flag-color {
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 10px;
+			border-radius: 5px 0 0 5px;
+			z-index: 1;
+		}
 
-        .standaloneContainer {
-            margin: 10px;
-            padding: 0;
-            border-radius: 5px;
-            color: #fff;
-            margin-top: 0;
-            margin-bottom: 10px;
-            display: block;
-            position: relative;
-        }
+		.container {
+			padding-left: 10px;
+			background-color: #1f2937;
+			border-radius: 5px;
+			padding: 20px;
+		}
 
-        .critical .flag-color {
-            background-color: red;
-        }
+		.standaloneContainer,
+		.category {
+			padding: 0;
+			border-radius: 5px;
+			color: #fff;
+			margin-top: 0;
+			margin-bottom: 10px;
+			display: block;
+			position: relative;
+		}
 
-        .warning .flag-color {
-            background-color: rgb(212, 212, 7);
-        }
+		.critical .flag-color {
+			background-color: red;
+		}
 
-        .safe .flag-color {
-            background-color: green;
-        }
-    </style>
-    <script>
-        window.onload = function() {
-            let localsCompleted = <%= locals.completed %>;
-            let intervalId = setInterval(function() {
-                console.log("Checking")
-                if (localsCompleted) {
-                    clearInterval(intervalId);
-                } else {
-                    location.reload();
-                }
-            }, 10000); // check every 10 seconds
-        }
-    </script>
+		.warning .flag-color {
+			background-color: rgb(212, 212, 7);
+		}
+
+		.safe .flag-color {
+			background-color: green;
+		}
+
+		.category {
+			margin-left: 5px;
+
+			.collapsible {
+				background-color: #ffffff12;
+				color: #fff;
+				width: 300px;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				border: none;
+				border-radius: 10px;
+				padding-left: 15px;
+				padding-right: 15px;
+				transition: 200ms;
+			}
+
+			.collapsible.opened,
+			.collapsible:hover {
+				background-color: #ffffff18;
+			}
+
+			.collapsible:after {
+				content: '\002B';
+				color: white;
+				font-weight: bold;
+				float: right;
+				margin-left: 5px;
+			}
+
+			.opened:after {
+				content: "\2212";
+			}
+
+			.content {
+				display: none;
+				animation: 0.4s fadeIn;
+				/* https://imgur.com/a/tXPzZ8B */
+				border-left-width: 2px;
+				border-left-color: #fff;
+			}
+
+		}
+
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+
+			to {
+				opacity: 1;
+			}
+		}
+	</style>
 </head>
+
 <body>
-    <% if (!(locals.completed)) { %>
-        <div class="center">
-        <img src=<%= locals.gifName || "Loading" %> alt="loading"> <br/~>
-        </div>
-    <% } else { %>
-        <div class="center white">
-            <h2>Report for ID: <%= locals.appID %> </h2>
-        </div>
 
-        <% if (jsonReport.returnvalue.regex.flagsTriggered == "") { %>
-            <div class="center">
-                </br>
-                <div class="flag safe">
-                    <div class="flag-color"></div>
-                        <div class="container">
-                            The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
-                        </div>
-                    </div>
-                </div>
-            </div> 
-            <% } %> 
-        <div style="margin: 10px;" class="white">
-            <h3>Static analysis: <br/></h3>
-        </div>
+	<% if (!(locals.completed)) { %>
+	<div class="center">
+		<img src=<%=locals.gifName || "Loading" %> alt="loading"> <br>
+		<script>
+			setTimeout(() => {
+				location.reload()
+			}, 10000);
+		</script>
+	</div>
 
-        <% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
-            <% if (flag.level >= 1) { %> <!--Repeating code >:( there is probbly a better way to do this-->
-                <% if (flag.level == 5) { %>
-                    <div class="flag critical">
-                        <div class="flag-color"></div>
-                        <div class="container">
-                         Known malicious software identified as: <%= flag.description %>
-                          <br/>
-                        </div>
-                    </div>
-                <% } else { %>  
-                    <div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
-                        <div class="flag-color"></div>
-                        <div class="container">
-                        <%= flag.description %>
-                        <br/>
-                        </div>
-                    </div>
-                <% } %> 
-            <% } %>
-        <% }); %>
+	<% } else { %>
 
-        <div style="margin: 10px;" class="white">
-            <h3>Malicious connections: <br/></h3>
-        </div>
+	<div class="center white">
+		<h2>Report for ID: <%= locals.appID %></h2>
+	</div>
 
-        <% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>  
-            <div class="flag critical">
-                <div class="flag-color"></div>
-                <div class="container">
-                    <%= flag %>
-                    <br/>
-                </div>
-            </div>
-        <% }); %>
+	<div class="category white">
+		<button type="button" class="collapsible">
+			<h3>Static analysis</h3>
+		</button>
+		<div class="content">
+			<div class="flags">
+				<% if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
+				<div class="flag safe">
+					<div class="flag-color"></div>
+					<div class="container">
+						The mod was scanned and no suspicious code was detected automatically. However, this doesn't
+						mean that the mod is 100% safe.
+					</div>
+				</div>
+				<% } else { %>
+				<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+				<% if (flag.level>= 1) { %>
+				<!--Repeating code >:( there is probbly a better way to do this-->
+				<% if (flag.level==5) { %>
+				<div class="flag critical">
+					<div class="flag-color"></div>
+					<div class="container">
+						Known malicious software identified as: <%= flag.description %>
+						<br>
+					</div>
+				</div>
+				<% } else { %>
+				<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+					<div class="flag-color"></div>
+					<div class="container">
+						<%= flag.description %>
+						<br>
+					</div>
+				</div>
+				<% } %>
+				<% } %>
+				<% }); %>
+				<% } %>
+			</div>
+		</div>
+	</div>
 
-        <div style="margin: 10px;" class="white">
-            <h3>Unknown connections: <br/></h3>
-        </div>
+	<div class="category white">
+		<button type="button" class="collapsible">
+			<h3>Malicious connections</h3>
+		</button>
+		<div class="content">
+			<div class="flags">
+				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
+				<div class="flag safe">
+					<div class="flag-color"></div>
+					<div class="container">
+						Not any malicious connection was made.
+					</div>
+				</div>
+				<% } else { %>
+				<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
+				<div class="flag critical">
+					<div class="flag-color"></div>
+					<div class="container">
+						<%= flag %>
+						<br>
+					</div>
+				</div>
+				<% }); %>
+				<% } %>
+			</div>
+		</div>
+	</div>
 
-        <% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>  
-            <div class="flag warning">
-                <div class="flag-color"></div>
-                <div class="container">
-                    <%= flag %>
-                    <br/>
-                </div>
-            </div>
-        <% }); %>      
 
-        <div style="margin: 10px;" class="white">
-            <h3>File info: <br/></h3>
-        </div>
+	<div class="category white">
+		<button type="button" class="collapsible">
+			<h3>Unknown connections</h3>
+		</button>
+		<div class="content">
+			<div class="flags">
+				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
+				<div class="flag safe">
+					<div class="flag-color"></div>
+					<div class="container">
+						Not any unknown connection was made.
+					</div>
+				</div>
+				<% } else { %>
+				<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
+				<div class="flag warning">
+					<div class="flag-color"></div>
+					<div class="container">
+						<%= flag %>
+						<br>
+					</div>
+				</div>
+				<% }); %>
+				<% } %>
+			</div>
+		</div>
+	</div>
 
-        <div class="standaloneContainer">
-            File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %> 
-        </div>
-        
-        <div class="standaloneContainer">
-            SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %> </br>
-            MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %> </br>
-            SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %> </br>
-        </div>
+	<div class="category white">
+		<button type="button" class="collapsible">
+			<h3>File info</h3>
+		</button>
+		<div class="content">
+			<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
+			<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
+			<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
+			<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
+			<p>
+				Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
+			</p>
+		</div>
+	</div>
 
-        <div class="standaloneContainer">
-          Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>><%= jsonReport.returnvalue.regex.fileProperties.downloadLink %></a> 
-        </div>
+	<% } %>
 
-    <% } %>
+	<script>
+		var collapsibles = document.getElementsByClassName("collapsible")
+
+		for (var i = 0; i < collapsibles.length; i++) {
+			collapsibles[i].addEventListener("click", function() {
+				this.classList.toggle("opened")
+				var content = this.nextElementSibling
+				if (content.style.display == "block") {
+					content.style.display = "none"
+				} else {
+					content.style.display = "block"
+				}
+			});
+		}
+	</script>
 </body>
+
 </html>

@@ -1,7 +1,20 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>RatterScanner online</title>
+	<title>RatterScanner | Scan</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="https://ratterscanner.com/favicon.ico">
+	<link rel="manifest" href="https://ratterscanner.com/manifest.json">
+	<link rel="apple-touch-icon" href="https://ratterscanner.com/logo192.png">
+
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="RatterScanner | Scan">
+	<meta property="og:description" content="Scan a file or view a report details using its ID.">
+	<meta property="og:color" content="#ffffff">
+
 	<style>
 		body {
 			font-family: Arial, sans-serif;
@@ -9,7 +22,7 @@
 			height: 100%;
 			margin: 0;
 		}
-		
+
 		.container {
 			max-width: 400px;
 			margin: 40px auto;
@@ -18,17 +31,17 @@
 			border-radius: 10px;
 			box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 		}
-		
+
 		.input-group {
 			margin-bottom: 20px;
 		}
-		
+
 		.input-group label {
 			display: block;
 			margin-bottom: 10px;
 			color: #fff;
 		}
-		
+
 		.input-group input[type="file"] {
 			padding: 10px;
 			border: 1px solid #ccc;
@@ -37,7 +50,7 @@
 			width: 100%;
 			box-sizing: border-box;
 		}
-		
+
 		.input-group input[type="text"] {
 			padding: 10px;
 			border: 1px solid #ccc;
@@ -46,12 +59,13 @@
 			width: 100%;
 			box-sizing: border-box;
 		}
-		
-		.input-group input[type="file"]:focus,.input-group input[type="text"]:focus {
+
+		.input-group input[type="file"]:focus,
+		.input-group input[type="text"]:focus {
 			border-color: #337ab7;
 			box-shadow: 0 0 10px rgba(51, 122, 187, 0.5);
 		}
-		
+
 		.button {
 			background-color: #337ab7;
 			color: #fff;
@@ -61,51 +75,52 @@
 			cursor: pointer;
 			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 		}
-		
+
 		.button:hover {
 			background-color: #23527c;
 		}
 
-        .white {
+		.white {
 			color: #fff;
-        }
-		
+		}
+
 		.dark-blue {
 			color: #23527c;
 		}
 	</style>
 	<script>
 		function checkForm() {
-		  var fileInput = document.getElementById('file');
-		  var textInput = document.getElementById('text');
-	  
-		  if (fileInput.files.length > 0 && textInput.value!== '') {
-			alert('You cannot upload a file and check an ID at the same time');
-		  } else if (fileInput.files.length > 0) {
-			const formData = new FormData();
-			formData.append('jarFile', fileInput.files[0]);
-			fetch("/upload", {
-			  method: 'POST',
-			  body: formData
-			})
-			.then(response => response.json())
-			.then(data => {
-			  const appID = data.appID;
-			  window.location.href = '/report?appID=' + appID;
-			})
-			.catch(error => console.error(error));
-		  } else if (textInput.value == "") {
-			alert("You must supply a file or an ID")
-		  } else if (textInput.value!== '') {
-			window.location.href = '/report?appID=' + textInput.value;
-		  }
+			var fileInput = document.getElementById('file');
+			var textInput = document.getElementById('text');
+
+			if (fileInput.files.length > 0 && textInput.value !== '') {
+				alert('You cannot upload a file and check an ID at the same time');
+			} else if (fileInput.files.length > 0) {
+				const formData = new FormData();
+				formData.append('jarFile', fileInput.files[0]);
+				fetch("/upload", {
+						method: 'POST',
+						body: formData
+					})
+					.then(response => response.json())
+					.then(data => {
+						const appID = data.appID;
+						window.location.href = '/report?appID=' + appID;
+					})
+					.catch(error => console.error(error));
+			} else if (textInput.value == "") {
+				alert("You must supply a file or an ID")
+			} else if (textInput.value !== '') {
+				window.location.href = '/report?appID=' + textInput.value;
+			}
 		}
-	  
+
 		function clearFileInput() {
-		  document.getElementById('file').value = '';
+			document.getElementById('file').value = '';
 		}
 	</script>
 </head>
+
 <body>
 	<div class="container">
 		<h2 class="white">Upload a file or view an ID</h2>
@@ -113,7 +128,8 @@
 			<div class="input-group">
 				<label for="file" style="color: #fff;">Select a file:</label>
 				<input type="file" id="file" name="file">
-				<button type="button" onclick="clearFileInput()">Clear file</button> <!--This needs to look a lot better, but works for now-->
+				<button type="button" onclick="clearFileInput()">Clear file</button>
+				<!--This needs to look a lot better, but works for now-->
 			</div>
 			<div class="input-group">
 				<label for="text" style="color: #fff;">Enter an ID:</label>
@@ -123,4 +139,5 @@
 		</form>
 	</div>
 </body>
+
 </html>
