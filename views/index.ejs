@@ -75,35 +75,56 @@
 		}
 	</style>
 	<script>
+		let captchaSvg; // global variable to store the svg
+		let captchaID; // global variable to store the id
+		let capAns; // global variable to store the captcha answer
+	
 		function checkForm() {
-		  var fileInput = document.getElementById('file');
-		  var textInput = document.getElementById('text');
-	  
-		  if (fileInput.files.length > 0 && textInput.value!== '') {
-			alert('You cannot upload a file and check an ID at the same time');
-		  } else if (fileInput.files.length > 0) {
-			const formData = new FormData();
-			formData.append('jarFile', fileInput.files[0]);
-			fetch("/upload", {
-			  method: 'POST',
-			  body: formData
-			})
-			.then(response => response.json())
-			.then(data => {
-			  const appID = data.appID;
-			  window.location.href = '/report?appID=' + appID;
-			})
-			.catch(error => console.error(error));
-		  } else if (textInput.value == "") {
-			alert("You must supply a file or an ID")
-		  } else if (textInput.value!== '') {
-			window.location.href = '/report?appID=' + textInput.value;
-		  }
+			var fileInput = document.getElementById('file');
+			var textInput = document.getElementById('text');
+			capAns = document.getElementById('capAnswer').value;
+	
+			if (fileInput.files.length > 0 && textInput.value!== '') {
+				alert('You cannot upload a file and check an ID at the same time');
+			} else if (fileInput.files.length > 0) {
+				const formData = new FormData();
+				formData.append('jarFile', fileInput.files[0]);
+				formData.append('captchaID', captchaID);
+				formData.append('capAns', capAns);
+	
+				fetch("/upload", {
+					method: "POST",
+					body: formData,
+				})
+				.then(response => response.json())
+				.then(data => {
+					const appID = data.appID;
+					window.location.href = '/report?appID=' + appID;
+				})
+				.catch(error => console.error(error));
+			} else if (textInput.value == "") {
+				alert("You must supply a file or an ID")
+			} else if (textInput.value!== '') {
+				window.location.href = '/report?appID=' + textInput.value;
+			}
 		}
-	  
+	
 		function clearFileInput() {
-		  document.getElementById('file').value = '';
+			document.getElementById('file').value = '';
 		}
+	
+		fetch('/captcha')
+		.then(response => response.json())
+		.then(data => {
+			captchaSvg = data.svg;
+			captchaID = data.id;
+	
+			// update the HTML elements
+			const svgElement = document.createElement('div');
+			svgElement.innerHTML = captchaSvg;
+			document.getElementById('captcha-container').appendChild(svgElement);
+		})
+		.catch(error => console.error('Error fetching captcha:', error));
 	</script>
 </head>
 <body>
@@ -118,6 +139,11 @@
 			<div class="input-group">
 				<label for="text" style="color: #fff;">Enter an ID:</label>
 				<input type="text" id="text" name="text">
+			</div>
+			<div class="white">
+				<div id="captcha-container"></div>
+				<label for="capAnswer">Enter the text above (case sensitive):</label>
+				<input type="text" id="capAnswer" name="capAnswer"><br><br>
 			</div>
 			<button class="button dark-blue" style="color: #fff;" onclick="checkForm()">Submit</button>
 		</form>

@@ -8,9 +8,11 @@ const fs = require('fs');
 const upload = multer();
 const app = express();
 const loadingGifs = [];
+let clientIDS = {};
 
 app.use(express.static("images"));
 app.set("view engine", "ejs");
+app.use(express.json());
 
 function readKeyFile() {
     const file = 'key.txt';
@@ -65,54 +67,86 @@ app.get("/report", (req, res) => {
     });
 })
 
-app.post("/upload", (req, res) => {
-  const upload = multer({ storage: multer.memoryStorage() }); // Store the file in memory
-  const uploadMiddleware = upload.single("jarFile");
+app.post("/upload", upload.single("jarFile"), (req, res) => {
+  const { jarFile, captchaID, capAns } = req.body;
+  const fileBuffer = req.file.buffer;
+  const fileSize = req.file.size;
+  const key = readKeyFile();
 
+  if (captchaID in clientIDS && capAns == clientIDS[captchaID]){
 
-  uploadMiddleware(req, res, (err) => {
-    if (err) {
-      return res.status(500).send({ message: "Error uploading file" });
-    }
+  } else {
+    res.status(403).send("Captcha incorrect")
+    console.log("Captcha incorrect")
+    return;
+  }
 
-    const fileBuffer = req.file.buffer;
-    const fileSize = req.file.size;
-    const key = readKeyFile();
+  if (!req.file) {
+    return res.status(400).send({ message: "No file uploaded" });
+  }
 
-    if (key == null || key == ""){
-        console.log("ERROR key not read")
-        return res.status(500).send({ message: "Error key is null" });
-    }
+  if (key == null || key == ""){
+      console.log("ERROR key not read")
+      return res.status(500).send({ message: "Error key is null" });
+  }
 
-    const formData = new FormData();
-    formData.append("file", fileBuffer, {
-      contentType: "application/octet-stream",
-      filename: req.file.originalname
+  const formData = new FormData();
+  formData.append("file", fileBuffer, {
+    contentType: "application/octet-stream",
+    filename: req.file.originalname
+  });
+
+  const options = {
+    method: "POST",
+    hostname: "api.ratterscanner.com",
+    path: "/jar_scanner",
+    headers: Object.assign({
+      "api_key": key,
+    }, formData.getHeaders())
+  };
+  let ID;
+
+  const req2 = https.request(options, (res2) => {
+    res2.on("data", (chunk) => { 
+      console.log(`Received chunk: ${chunk}`);
+      const jsonData = JSON.parse(chunk); // parse the response
+      const ID = jsonData.id;
+      res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID });
     });
-
-    const options = {
-      method: "POST",
-      hostname: "api.ratterscanner.com",
-      path: "/jar_scanner",
-      headers: Object.assign({
-        "api_key": key,
-      }, formData.getHeaders())
-    };
-    let ID;
-
-    const req2 = https.request(options, (res2) => {
-      res2.on("data", (chunk) => { 
-        console.log(`Received chunk: ${chunk}`);
-        const jsonData = JSON.parse(chunk); // parse the response
-        const ID = jsonData.id;
-        res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID });
-      });
-      res2.on("end", () => {
-        console.log("Upload complete");
-      });
+    res2.on("end", () => {
+      console.log("Upload complete");
     });
+  });
 
-    formData.pipe(req2);
+  formData.pipe(req2);
+});
+
+app.get("/captchaTest", function (req, res) {
+    res.render("captcha")
+})
+
+app.get('/captcha', function (req, res) {
+  if (Math.round(Math.random()) == 1){
+    const randomNumber = Math.floor(Math.random() * 3) + 4;
+    var captcha = svgCaptcha.create({
+      size: randomNumber,     
+      color: "true"
+    });
+  } else {
+    var captcha = svgCaptcha.createMathExpr({
+      color: "true"
+    });
+  }
+
+  
+  var captchaID = Math.random().toString(36).substring(2, 9); // Generate a random ID
+  var captchaText = captcha.text;
+   
+  clientIDS[captchaID] = captchaText;
+
+  res.json({
+    id: captchaID,
+    svg: captcha.data.toString('utf8')
   });
 });
 
