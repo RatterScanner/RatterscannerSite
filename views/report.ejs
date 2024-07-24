@@ -88,6 +88,20 @@
 			background-color: green;
 		}
 
+		.button {
+			background-color: #337ab7;
+			color: #fff;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+		}
+
+		.button:hover {
+			background-color: #23527c;
+		}
+
 		.category {
 			margin-left: 5px;
 
@@ -143,6 +157,11 @@
 			}
 		}
 	</style>
+	<script>
+		function back(){
+			window.location.href = "/"
+		}
+	</script>
 </head>
 
 <body>
@@ -158,12 +177,13 @@
 	</div>
 
 	<% } else { %>
-
+	<button class="button dark-blue" style="color: #fff;" onclick="back()">Go back</button>
 	<div class="center white">
 		<h2>Report for ID: <%= locals.appID %></h2>
 	</div>
 
 	<div class="category white">
+		<i>Click on a box to expand it</i>
 		<button type="button" class="collapsible">
 			<h3>Static analysis</h3>
 		</button>

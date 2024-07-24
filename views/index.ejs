@@ -23,6 +23,12 @@
 			margin: 0;
 		}
 
+		.loadingContainer {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
 		.container {
 			max-width: 400px;
 			margin: 40px auto;
@@ -92,6 +98,7 @@
 		let captchaSvg; // global variable to store the svg
 		let captchaID; // global variable to store the id
 		let capAns; // global variable to store the captcha answer
+		let res;
 	
 		function checkForm() {
 			var fileInput = document.getElementById('file');
@@ -105,21 +112,28 @@
 				formData.append('jarFile', fileInput.files[0]);
 				formData.append('captchaID', captchaID);
 				formData.append('capAns', capAns);
+
+				document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
 	
 				fetch("/upload", {
 					method: "POST",
 					body: formData,
 				})
-				.then(response => response.json())
+				.then(response => response.json()) // parse the response body as JSON
 				.then(data => {
-					const appID = data.appID;
-					window.location.href = '/report?appID=' + appID;
+				if (data.message == "Captcha incorrect") {
+					alert("Captcha failed, if this persists refresh the page")
+					document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+					return;
+				}
+				const appID = data.appID;
+				window.location.href = '/report?appID=' + appID;
 				})
 				.catch(error => console.error(error));
 			} else if (textInput.value == "") {
 				alert("You must supply a file or an ID")
-			} else if (textInput.value!== '') {
-				window.location.href = '/report?appID=' + textInput.value;
+			} else if (textInput.value!== "") {
+				window.location.href = "/report?appID=" + textInput.value;
 			}
 		}
 	
@@ -164,6 +178,7 @@
 			<button class="button dark-blue" style="color: #fff;" onclick="checkForm()">Submit</button>
 		</form>
 	</div>
+	<div class="loadingContainer" id="loadingContainer"></div>
 </body>
 
 </html>
