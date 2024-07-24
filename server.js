@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 })
 
 app.get("/favicon.ico", (req, res) => {
-    res.download(favicon)
+	res.download("https://ratterscanner.com/favicon.ico")
 })
 
 app.get("/report", (req, res) => {
@@ -150,4 +150,9 @@ app.get('/captcha', function (req, res) {
   });
 });
 
+app.use(function (req, res, next) {
+	res.status(404).render("404")
+});
+
 app.listen(3000);
+console.log('Listening at port 3000')

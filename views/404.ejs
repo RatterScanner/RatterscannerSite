@@ -1,15 +1,31 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>404</title>
+	<title>RatterScanner | 404</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="https://ratterscanner.com/favicon.ico">
+	<link rel="manifest" href="https://ratterscanner.com/manifest.json">
+	<link rel="apple-touch-icon" href="https://ratterscanner.com/logo192.png">
+
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="RatterScanner | 404">
+	<meta property="og:description" content="What a strange place it is.">
+	<meta property="og:color" content="#ff7878">
+
 	<style>
 		body {
 			font-family: Arial, sans-serif;
 			background-color: #111827;
 			height: 100%;
-			margin: 0;
+			color: #fff;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
 		}
-		
+
 		.button {
 			background-color: #337ab7;
 			color: #fff;
@@ -18,17 +34,20 @@
 			border-radius: 5px;
 			cursor: pointer;
 			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+			transition: 200ms ease-in;
 		}
-		
+
 		.button:hover {
-			background-color: #23527c;
+			background-color: #569cd8;
+			transform: scale(1.025);
 		}
 	</style>
 </head>
+
 <body>
-	<div style="color: white;">
-		<h2>Error 404, analysis not found</h2>
-		<button class="button" onclick="location.href='/';">Go Back</button>
-	</div>
+	<h1 style="margin-bottom: 5px; margin-top: 40px;">Error 404</h1>
+	<h3 style="margin-bottom: 40px;">The content you searched doesn't exist.</h3>
+	<button class="button" onclick="location.href='/'">Go Back</button>
 </body>
+
 </html>
