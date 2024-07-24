@@ -74,7 +74,7 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   const key = readKeyFile();
 
   if (captchaID in clientIDS && capAns == clientIDS[captchaID]){
-
+    delete clientIDS[captchaID]
   } else {
     res.status(403).send("Captcha incorrect")
     console.log("Captcha incorrect")
