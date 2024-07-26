@@ -89,6 +89,10 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
       return res.status(500).send({ message: "Error key is null" });
   }
 
+  if (fileSize / (1024 * 1024) > 150){ // Check if the file is larger than 150MB
+    return res.status(400).send({ message: "Files cannot be larger than 150MB" });
+  }
+
   if (captchaQueue.includes(captchaID) && capAns == clientIDS[captchaID]){
     const index = captchaQueue.indexOf(captchaID);
     captchaQueue.splice(index, 1);
