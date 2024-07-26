@@ -7,8 +7,9 @@ const fs = require('fs');
 
 const upload = multer();
 const app = express();
-const loadingGifs = [];
 let clientIDS = {};
+const captchaQueue = [];
+const maxCaptchaIds = 100; // Limits the number of IDs that can be stored
 
 app.use(express.static("images"));
 app.set("view engine", "ejs");
@@ -73,21 +74,29 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   const fileSize = req.file.size;
   const key = readKeyFile();
 
-  if (captchaID in clientIDS && capAns == clientIDS[captchaID]){
-    delete clientIDS[captchaID]
-  } else {
-    res.status(403).send({message: "Captcha incorrect"})
-    console.log("Captcha incorrect")
-    return;
-  }
-
   if (!req.file) {
     return res.status(400).send({ message: "No file uploaded" });
+  }
+  const magicNumber = fileBuffer.toString('hex', 0, 4);
+
+  
+  if (magicNumber !== '504b0304') { // Check if a file is actually a jar file with magic bytes
+    return res.status(400).send({ message: "Invalid JAR file" });
   }
 
   if (key == null || key == ""){
       console.log("ERROR key not read")
       return res.status(500).send({ message: "Error key is null" });
+  }
+
+  if (captchaQueue.includes(captchaID) && capAns == clientIDS[captchaID]){
+    const index = captchaQueue.indexOf(captchaID);
+    captchaQueue.splice(index, 1);
+    delete clientIDS[captchaID]
+  } else {
+    res.status(403).send({message: "Captcha incorrect"})
+    console.log("Captcha incorrect")
+    return;
   }
 
   const formData = new FormData();
@@ -101,6 +110,7 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
     hostname: "api.ratterscanner.com",
     path: "/jar_scanner",
     headers: Object.assign({
+      "Host": "api.ratterscanner.com",
       "api_key": key,
     }, formData.getHeaders())
   };
@@ -110,6 +120,12 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
     res2.on("data", (chunk) => { 
       console.log(`Received chunk: ${chunk}`);
       const jsonData = JSON.parse(chunk); // parse the response
+      
+     /* if (jsonData.safe) {
+        res.render("safe")
+        return;
+      } */
+
       const ID = jsonData.id;
       res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID });
     });
@@ -121,11 +137,13 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   formData.pipe(req2);
 });
 
-app.get("/captchaTest", function (req, res) {
-    res.render("captcha")
-})
+app.get("/captcha", function (req, res) {
+  if (captchaQueue.length >= maxCaptchaIds) {
+    // remove the oldest captcha ID if the limit is reached
+    const oldestCaptchaId = captchaQueue.shift();
+    delete clientIDS[oldestCaptchaId];
+  }
 
-app.get('/captcha', function (req, res) {
   if (Math.round(Math.random()) == 1){
     const randomNumber = Math.floor(Math.random() * 3) + 4;
     var captcha = svgCaptcha.create({
@@ -138,11 +156,11 @@ app.get('/captcha', function (req, res) {
     });
   }
 
-  
   var captchaID = Math.random().toString(36).substring(2, 9); // Generate a random ID
   var captchaText = captcha.text;
    
   clientIDS[captchaID] = captchaText;
+  captchaQueue.push(captchaID);
 
   res.json({
     id: captchaID,

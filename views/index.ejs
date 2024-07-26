@@ -99,54 +99,72 @@
 		let captchaID; // global variable to store the id
 		let capAns; // global variable to store the captcha answer
 		let res;
-	
-		function checkForm() {
-			var fileInput = document.getElementById('file');
-			var textInput = document.getElementById('text');
-			capAns = document.getElementById('capAnswer').value;
-	
-			if (fileInput.files.length > 0 && textInput.value!== '') {
-				alert('You cannot upload a file and check an ID at the same time');
-			} else if (fileInput.files.length > 0) {
-				const formData = new FormData();
-				formData.append('jarFile', fileInput.files[0]);
-				formData.append('captchaID', captchaID);
-				formData.append('capAns', capAns);
 
-				document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
-	
-				fetch("/upload", {
-					method: "POST",
-					body: formData,
-				})
-				.then(response => response.json()) // parse the response body as JSON
-				.then(data => {
-				if (data.message == "Captcha incorrect") {
-					alert("Captcha failed, if this persists refresh the page")
-					document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
-					return;
-				}
-				const appID = data.appID;
-				window.location.href = '/report?appID=' + appID;
-				})
-				.catch(error => console.error(error));
-			} else if (textInput.value == "") {
-				alert("You must supply a file or an ID")
-			} else if (textInput.value!== "") {
-				window.location.href = "/report?appID=" + textInput.value;
+		function checkForm() {
+		var fileInput = document.getElementById('file');
+		var textInput = document.getElementById('text');
+		capAns = document.getElementById('capAnswer').value;
+
+		if (fileInput.files.length > 0 && textInput.value !== '') {
+			alert('You cannot upload a file and check an ID at the same time');
+		} else if (fileInput.files.length > 0) {
+			const formData = new FormData();
+			formData.append('jarFile', fileInput.files[0]);
+			formData.append('captchaID', captchaID);
+			formData.append('capAns', capAns);
+
+			document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
+
+			const controller = new AbortController();
+			const signal = controller.signal;
+
+			// Set a timeout of 1 minute
+			const timeoutId = setTimeout(() => {
+			controller.abort();
+			alert('Request timed out');
+			document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+			}, 60000);
+
+			fetch("/upload", {
+				method: "POST",
+				body: formData,
+				signal
+			})
+			.then(response => response.json()) // parse the response body as JSON
+			.then(data => {
+			clearTimeout(timeoutId);
+			if (!(data.message.includes("Jar file uploaded successfully"))) {
+				alert(data.message);
+				document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+				return;
 			}
+			const appID = data.appID;
+			window.location.href = "/report?appID=" + appID;
+			})
+			.catch(error => {
+			if (error.name === 'AbortError') {
+				console.log('Request was aborted');
+			} else {
+				console.error(error);
+			}
+			});
+		} else if (textInput.value == "") {
+			alert("You must supply a file or an ID")
+		} else if (textInput.value !== "") {
+			window.location.href = "/report?appID=" + textInput.value;
 		}
-	
+		}
+
 		function clearFileInput() {
-			document.getElementById('file').value = '';
+		document.getElementById('file').value = '';
 		}
-	
+
 		fetch('/captcha')
 		.then(response => response.json())
 		.then(data => {
 			captchaSvg = data.svg;
 			captchaID = data.id;
-	
+
 			// update the HTML elements
 			const svgElement = document.createElement('div');
 			svgElement.innerHTML = captchaSvg;
@@ -162,7 +180,7 @@
 		<form onsubmit="return false;">
 			<div class="input-group">
 				<label for="file" style="color: #fff;">Select a file:</label>
-				<input type="file" id="file" name="file">
+				<input type="file" id="file" name="file" accept=".jar">
 				<button type="button" onclick="clearFileInput()">Clear file</button>
 				<!--This needs to look a lot better, but works for now-->
 			</div>
@@ -180,5 +198,4 @@
 	</div>
 	<div class="loadingContainer" id="loadingContainer"></div>
 </body>
-
 </html>
