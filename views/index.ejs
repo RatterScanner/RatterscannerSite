@@ -101,17 +101,17 @@
 		let res;
 
 		function checkForm() {
-		var fileInput = document.getElementById('file');
-		var textInput = document.getElementById('text');
-		capAns = document.getElementById('capAnswer').value;
+		var fileInput = document.getElementById("file");
+		var textInput = document.getElementById("text");
+		capAns = document.getElementById("capAnswer").value;
 
 		if (fileInput.files.length > 0 && textInput.value !== '') {
-			alert('You cannot upload a file and check an ID at the same time');
+			alert("You cannot upload a file and check an ID at the same time");
 		} else if (fileInput.files.length > 0) {
 			const formData = new FormData();
-			formData.append('jarFile', fileInput.files[0]);
-			formData.append('captchaID', captchaID);
-			formData.append('capAns', capAns);
+			formData.append("jarFile", fileInput.files[0]);
+			formData.append("captchaID", captchaID);
+			formData.append("capAns", capAns);
 
 			document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
 
@@ -121,7 +121,8 @@
 			// Set a timeout of 1 minute
 			const timeoutId = setTimeout(() => {
 			controller.abort();
-			alert('Request timed out');
+			alert("Request timed out");
+			window.location.reload();
 			document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
 			}, 60000);
 
@@ -133,9 +134,26 @@
 			.then(response => response.json()) // parse the response body as JSON
 			.then(data => {
 			clearTimeout(timeoutId);
-			if (!(data.message.includes("Jar file uploaded successfully"))) {
+			if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
 				alert(data.message);
 				document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+				return;
+			} else if(data.message.includes("File is safe")) {
+				console.log("Data: " + JSON.stringify(data))
+				const sendData = {
+					fileName: data.fileName,
+					fileDownload: data.download
+				};
+				const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+				window.location.href = `/safe${queryString}`;
+				return;
+			} else if(data.message.includes("File is malicious")) {
+				console.log("Data: " + JSON.stringify(data))
+				const sendData = {
+					fileName: data.fileName,
+				};
+				const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+				window.location.href = `/malicious${queryString}`;
 				return;
 			}
 			const appID = data.appID;

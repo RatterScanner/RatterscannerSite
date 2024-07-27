@@ -74,6 +74,8 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   const fileSize = req.file.size;
   const key = readKeyFile();
 
+  console.log("Recieved file")
+
   if (!req.file) {
     return res.status(400).send({ message: "No file uploaded" });
   }
@@ -84,16 +86,16 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
     return res.status(400).send({ message: "Invalid JAR file" });
   }
 
-  if (key == null || key == ""){
+  if (key == null || key == "") {
       console.log("ERROR key not read")
       return res.status(500).send({ message: "Error key is null" });
   }
 
-  if (fileSize / (1024 * 1024) > 150){ // Check if the file is larger than 150MB
+  if (fileSize / (1024 * 1024) > 150) { // Check if the file is larger than 150MB
     return res.status(400).send({ message: "Files cannot be larger than 150MB" });
   }
 
-  if (captchaQueue.includes(captchaID) && capAns == clientIDS[captchaID]){
+  if (captchaQueue.includes(captchaID) && capAns == clientIDS[captchaID]) {
     const index = captchaQueue.indexOf(captchaID);
     captchaQueue.splice(index, 1);
     delete clientIDS[captchaID]
@@ -121,20 +123,40 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   let ID;
 
   const req2 = https.request(options, (res2) => {
+    let data = '';
+  
     res2.on("data", (chunk) => { 
-      console.log(`Received chunk: ${chunk}`);
-      const jsonData = JSON.parse(chunk); // parse the response
-      
-     /* if (jsonData.safe) {
-        res.render("safe")
-        return;
-      } */
-
-      const ID = jsonData.id;
-      res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID });
+      console.log("Recived chunk: " + chunk)
+      data += chunk;
     });
+  
     res2.on("end", () => {
       console.log("Upload complete");
+      const jsonData = JSON.parse(data); // parse the response
+      let fileSource
+  
+      if (jsonData.status == "File found in safe list, not scanning") {
+        if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
+          fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
+        } else {
+          fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
+        }
+        console.log(fileSource)
+        res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
+        return;
+      } else if (jsonData.knownFileDetails.safe == false) {
+        if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
+          fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
+        } else {
+          fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
+        }
+        console.log(fileSource)
+        res.status(200).send({ message: "File is malicious", fileName: jsonData.fileName, download: fileSource});
+        return;
+      }
+  
+      const ID = jsonData.id;
+      res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID });
     });
   });
 
@@ -170,6 +192,18 @@ app.get("/captcha", function (req, res) {
     id: captchaID,
     svg: captcha.data.toString('utf8')
   });
+});
+
+app.get("/safe", function (req, res) {
+  const data = JSON.parse(req.query.data);
+  
+  res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
+});
+
+app.get("/malicious", function (req, res) {
+  const data = JSON.parse(req.query.data);
+  
+  res.render("malicious", {fileName: data.fileName, downloadLink: data.fileDownload});
 });
 
 app.use(function (req, res, next) {
