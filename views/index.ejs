@@ -99,82 +99,90 @@
 		let captchaID; // global variable to store the id
 		let capAns; // global variable to store the captcha answer
 		let res;
+		let submitted = false;
 
 		function checkForm() {
-		var fileInput = document.getElementById("file");
-		var textInput = document.getElementById("text");
-		capAns = document.getElementById("capAnswer").value;
-
-		if (fileInput.files.length > 0 && textInput.value !== '') {
-			alert("You cannot upload a file and check an ID at the same time");
-		} else if (fileInput.files.length > 0) {
-			const formData = new FormData();
-			formData.append("jarFile", fileInput.files[0]);
-			formData.append("captchaID", captchaID);
-			formData.append("capAns", capAns);
-
-			document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
-
-			const controller = new AbortController();
-			const signal = controller.signal;
-
-			// Set a timeout of 1 minute
-			const timeoutId = setTimeout(() => {
-			controller.abort();
-			alert("Request timed out");
-			window.location.reload();
-			document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
-			}, 60000);
-
-			fetch("/upload", {
-				method: "POST",
-				body: formData,
-				signal
-			})
-			.then(response => response.json()) // parse the response body as JSON
-			.then(data => {
-			clearTimeout(timeoutId);
-			if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
-				alert(data.message);
-				document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
-				return;
-			} else if(data.message.includes("File is safe")) {
-				console.log("Data: " + JSON.stringify(data))
-				const sendData = {
-					fileName: data.fileName,
-					fileDownload: data.download
-				};
-				const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-				window.location.href = `/safe${queryString}`;
-				return;
-			} else if(data.message.includes("File is malicious")) {
-				console.log("Data: " + JSON.stringify(data))
-				const sendData = {
-					fileName: data.fileName,
-				};
-				const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-				window.location.href = `/malicious${queryString}`;
-				return;
+			if (submitted){
+				return; // The user has already pressed the submit button
 			}
-			const appID = data.appID;
-			window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
-			})
-			.catch(error => {
-			if (error.name === 'AbortError') {
-				console.log('Request was aborted');
-			} else {
-				console.error(error);
+			let fileInput = document.getElementById("file");
+			let textInput = document.getElementById("text");
+			capAns = document.getElementById("capAnswer").value;
+			submitted = true;
+
+			if (fileInput.files.length > 0 && textInput.value !== "") {
+				alert("You cannot upload a file and check an ID at the same time");
+				submitted = false;
+			} else if (fileInput.files.length > 0) {
+				const formData = new FormData();
+				formData.append("jarFile", fileInput.files[0]);
+				formData.append("captchaID", captchaID);
+				formData.append("capAns", capAns);
+
+				document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
+
+				const controller = new AbortController();
+				const signal = controller.signal;
+
+				// Set a timeout of 1 minute
+				const timeoutId = setTimeout(() => {
+					controller.abort();
+					alert("Request timed out");
+					window.location.reload();
+					document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+					submitted = false; // Reset submitted here
+				}, 60000);
+
+				fetch("/upload", {
+					method: "POST",
+					body: formData,
+					signal
+				})
+				.then(response => response.json()) // parse the response body as JSON
+				.then(data => {
+					clearTimeout(timeoutId);
+					if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
+						alert(data.message);
+						document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+					} else if(data.message.includes("File is safe")) {
+						const sendData = {
+							fileName: data.fileName,
+							fileDownload: data.download
+						};
+						const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+						window.location.href = `/safe${queryString}`;
+					} else if(data.message.includes("File is malicious")) {
+						const sendData = {
+							fileName: data.fileName,
+						};
+						const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+						window.location.href = `/malicious${queryString}`;
+					} else {
+						const appID = data.appID;
+						window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
+					}
+				})
+				.catch(error => {
+					if (error.name === 'AbortError') {
+						console.log('Request was aborted');
+					} else {
+						console.error(error);
+					}
+					submitted = false;
+				})
+				.finally(() => {
+					submitted = false;
+				});
+			} else if (textInput.value == "") {
+				alert("You must supply a file or an ID")
+				submitted = false;
+			} else if (textInput.value !== "") {
+				window.location.href = "/report?appID=" + textInput.value;
 			}
-			});
-		} else if (textInput.value == "") {
-			alert("You must supply a file or an ID")
-		} else if (textInput.value !== "") {
-			window.location.href = "/report?appID=" + textInput.value;
-		}
 		}
 
 		function clearFileInput() {
-		document.getElementById('file').value = '';
+			document.getElementById('file').value = '';
 		}
 
 		fetch('/captcha')
