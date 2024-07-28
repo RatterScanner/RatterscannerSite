@@ -29,10 +29,6 @@
 			justify-content: center;
 		}
 
-		.white {
-			color: #fff;
-		}
-
 		.flags {
 			margin-top: 10px;
 		}
@@ -76,14 +72,6 @@
 			position: relative;
 		}
 
-		.critical .flag-color {
-			background-color: red;
-		}
-
-		.warning .flag-color {
-			background-color: rgb(212, 212, 7);
-		}
-
 		.safe .flag-color {
 			background-color: green;
 		}
@@ -103,23 +91,29 @@
 		}
 	</style>
 	<script>
+		function back(){
+			window.location.href = "/"
+		}
     </script>
 </head>
 <body>
+	<button class="button dark-blue" style="color: #fff;" onclick="back()">Go back</button>
     <div class="center">
         <div class="flag safe">
             <div class="flag-color"></div>
-            <div class="container">
+            <div class="container"> 
                 The file <%= locals.fileName  %> was manually confirmed to be safe, this file is not malicious.
             </div>
         </div>
     </div>
-    <div class="center">
-        <div class="flag safe">
-            <div class="container">
-                <a href=<%= locals.downloadLink %>>Modrinth/Github link</a> 
-            </div>
-        </div>
-    </div>
+	<% if (!(locals.downloadLink == undefined)) { %>
+		<div class="center">
+			<div class="flag safe">
+				<div class="container">
+					<a href=<%= locals.downloadLink %>>Modrinth/Github link</a> 
+				</div>
+			</div>
+		</div>
+	<% } %>
 </body>
 </html>

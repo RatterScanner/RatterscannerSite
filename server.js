@@ -30,10 +30,11 @@ app.get("/favicon.ico", (req, res) => {
 })
 
 app.get("/report", (req, res) => {
-    let appID = req.query.appID
+    let appID = req.query.appID;
+    let downloadCount = req.query.downloads;
     if (appID == undefined){
-        res.status(404).render("404")
-        return
+        res.status(404).render("404");
+        return;
     }
 
     let url = "https://api.ratterscanner.com/status/" + appID;
@@ -64,7 +65,7 @@ app.get("/report", (req, res) => {
         if (jsonData.state == "completed"){
             completed = true;
         }
-        res.render("report", {completed: completed, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
+        res.render("report", {completed: completed, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
 })
 
@@ -154,9 +155,10 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
         res.status(200).send({ message: "File is malicious", fileName: jsonData.fileName, download: fileSource});
         return;
       }
-  
+      const downloads = jsonData.knownFileDetails.modrinthInfo.amountOfDownloads;
+
       const ID = jsonData.id;
-      res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID });
+      res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID, downloads: downloads});
     });
   });
 

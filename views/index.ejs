@@ -157,7 +157,7 @@
 				return;
 			}
 			const appID = data.appID;
-			window.location.href = "/report?appID=" + appID;
+			window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
 			})
 			.catch(error => {
 			if (error.name === 'AbortError') {

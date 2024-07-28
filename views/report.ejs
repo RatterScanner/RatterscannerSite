@@ -189,6 +189,15 @@
 		</button>
 		<div class="content">
 			<div class="flags">
+				 <% if (locals.downloads > 10000) { %> 
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod was found on modrinth with 10K+ downloads, it is most likley safe.
+						</div>
+					</div>
+				<% } %> 
+
 				<% if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
 				<div class="flag safe">
 					<div class="flag-color"></div>
