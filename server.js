@@ -88,7 +88,7 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   }
 
   if (key == null || key == "") {
-      console.log("ERROR key not read")
+      console.error("ERROR key not read")
       return res.status(500).send({ message: "Error key is null" });
   }
 
@@ -102,7 +102,7 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
     delete clientIDS[captchaID]
   } else {
     res.status(403).send({message: "Captcha incorrect"})
-    console.log("Captcha incorrect")
+    console.error("Captcha incorrect")
     return;
   }
 
@@ -142,20 +142,18 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
         } else {
           fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
         }
-        console.log(fileSource)
         res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
         return;
-      } else if (jsonData.knownFileDetails.safe == false) {
+      } else if (jsonData.knownFileDetails?.safe == false) {
         if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
           fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
         } else {
           fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
         }
-        console.log(fileSource)
         res.status(200).send({ message: "File is malicious", fileName: jsonData.fileName, download: fileSource});
         return;
       }
-      const downloads = jsonData.knownFileDetails.modrinthInfo.amountOfDownloads;
+      const downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
 
       const ID = jsonData.id;
       res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID, downloads: downloads});
@@ -213,4 +211,4 @@ app.use(function (req, res, next) {
 });
 
 app.listen(3000);
-console.log('Listening at port 3000')
+console.log("Listening")
