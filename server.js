@@ -93,7 +93,7 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
       return res.status(500).send({ message: "Error key is null" });
   }
 
-  if (fileSize / 2048 > fileSizeLimit + 0.25559063) { // The addition is needed as the return value of req.file.size is always off by that much
+  if (fileSize / (1024 * 1024) > fileSizeLimit) {
     return res.status(400).send({ message: "Files cannot be larger than " + fileSizeLimit + " MB" });
   }
 
