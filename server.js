@@ -10,6 +10,7 @@ const app = express();
 let clientIDS = {};
 const captchaQueue = [];
 const maxCaptchaIds = 100; // Limits the number of IDs that can be stored
+const fileSizeLimit = 6 // The maximum file size an uploaded file can have (In MB)
 
 app.use(express.static("images"));
 app.set("view engine", "ejs");
@@ -92,8 +93,8 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
       return res.status(500).send({ message: "Error key is null" });
   }
 
-  if (fileSize / (1024 * 1024) > 150) { // Check if the file is larger than 150MB
-    return res.status(400).send({ message: "Files cannot be larger than 150MB" });
+  if (fileSize / 2048 > fileSizeLimit + 0.25559063) { // The addition is needed as the return value of req.file.size is always off by that much
+    return res.status(400).send({ message: "Files cannot be larger than " + fileSizeLimit + " MB" });
   }
 
   if (captchaQueue.includes(captchaID) && capAns == clientIDS[captchaID]) {
