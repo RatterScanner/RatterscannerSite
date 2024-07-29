@@ -144,14 +144,6 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
         }
         res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
         return;
-      } else if (jsonData.knownFileDetails?.safe == false) {
-        if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
-          fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
-        } else {
-          fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
-        }
-        res.status(200).send({ message: "File is malicious", fileName: jsonData.fileName, download: fileSource});
-        return;
       }
       const downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
 
@@ -198,12 +190,6 @@ app.get("/safe", function (req, res) {
   const data = JSON.parse(req.query.data);
   
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
-});
-
-app.get("/malicious", function (req, res) {
-  const data = JSON.parse(req.query.data);
-  
-  res.render("malicious", {fileName: data.fileName, downloadLink: data.fileDownload});
 });
 
 app.use(function (req, res, next) {
