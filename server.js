@@ -1,25 +1,31 @@
 const express = require("express");
 const https = require("node:https");
 const multer = require("multer");
-const FormData = require('form-data');
-var svgCaptcha = require('svg-captcha');
-const fs = require('fs');
+const FormData = require("form-data");
+var svgCaptcha = require("svg-captcha");
+const fs = require("fs");
+
+let config = undefined;
+
+const data = fs.readFileSync("config.json", "utf8");
+config = JSON.parse(data);
+
+if (config == undefined) {
+  console.error("Config is null and the program cannot continue")
+  throw new Error(
+    "Program Terminated");
+}
 
 const upload = multer();
 const app = express();
 let clientIDS = {};
 const captchaQueue = [];
-const maxCaptchaIds = 100; // Limits the number of IDs that can be stored
-const fileSizeLimit = 6 // The maximum file size an uploaded file can have (In MB)
+const maxCaptchaIds = config.maxCaptchas; // Limits the number of IDs that can be stored
+const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
 
 app.use(express.static("images"));
 app.set("view engine", "ejs");
 app.use(express.json());
-
-let config = undefined;
-
-const data = fs.readFileSync('config.json', 'utf8');
-config = JSON.parse(data);
 
 app.get("/", (req, res) => {
     res.render("index");
