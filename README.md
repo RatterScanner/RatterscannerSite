@@ -7,9 +7,9 @@ You can test the website directly from [here](https://scan.ratterscanner.com/).
 ## Running
 
 - Run `npm install`
-- Create a `key.txt` file at the root and place your RatterScanner API key inside *(needed for the file upload)*
+- Edit the config.json file and add your API key to the apiKey variable
+- Make any other config changes 
 - Run `npm run start`.
 
 # Config
-There are only two variables that should be changed maxCaptchaIds and fileSizeLimit. maxCaptchaIds sets the limit for the number of captchas that can be stored at one time. When the limit is reached new captchas overwtite the old. fileSizeLimit sets the max allowed size for files to be uploaded. It is set at 6MB by deafult because the ratterscannerAPI takes more than 1min to respond with anything larger. </br>
-If you wish to change the upload limit I would reccomend modifying the timeout time in the index.ejs file.
+All configuration is done in the config.json file.
