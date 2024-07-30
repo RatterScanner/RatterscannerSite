@@ -1,0 +1,6 @@
+{
+    "apiKey": "apiKeyGoHere",
+    "port": "3000",
+    "maxCaptchas": 100,
+    "fileSizeLimit": 6
+}

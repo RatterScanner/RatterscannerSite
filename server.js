@@ -16,11 +16,10 @@ app.use(express.static("images"));
 app.set("view engine", "ejs");
 app.use(express.json());
 
-function readKeyFile() {
-    const file = 'key.txt';
-    const contents = fs.readFileSync(file, 'utf-8');
-    return contents;
-  }
+let config = undefined;
+
+const data = fs.readFileSync('config.json', 'utf8');
+config = JSON.parse(data);
 
 app.get("/", (req, res) => {
     res.render("index");
@@ -74,7 +73,7 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   const { jarFile, captchaID, capAns } = req.body;
   const fileBuffer = req.file.buffer;
   const fileSize = req.file.size;
-  const key = readKeyFile();
+  const key = config.apiKey;
 
   console.log("Recieved file")
 
@@ -197,5 +196,5 @@ app.use(function (req, res, next) {
 	res.status(404).render("404")
 });
 
-app.listen(3000);
-console.log("Listening")
+app.listen(config.port);
+console.log("Listening on port: " + config.port)
