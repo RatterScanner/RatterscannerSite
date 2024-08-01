@@ -2,7 +2,6 @@ const express = require("express");
 const https = require("node:https");
 const multer = require("multer");
 const FormData = require("form-data");
-var svgCaptcha = require("svg-captcha");
 const fs = require("fs");
 
 let config = undefined;
