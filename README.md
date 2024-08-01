@@ -6,11 +6,11 @@ You can test the website directly from [here](https://scan.ratterscanner.com/).
 
 ## Running
 
-- Run `npm install`
-- Rename the config-example.json file and add your API key to "apiKey": "<apikeyGoHere>",
+- Rename the config-example.json file to config.json and add your API key to "apiKey": "<apikeyGoHere>",
 - Add the recaptcha site key and secret key to  "captchaKey": "<captchaKeyGoHere>" and "siteKey": "<siteKeygoHere>"
 - Make any other config changes 
-- Run `npm run start`.
+- Run `npm install` to download libraries
+- Run `npm run start` to start the webserver.
 
 # Config
 All configuration is done in the config.json file.
