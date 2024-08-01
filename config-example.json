@@ -1,7 +1,7 @@
 {
-    "apiKey": "apikeyGoHere",
+    "apiKey": "<apikeyGoHere>",
     "port": "3000",
     "fileSizeLimit": 6,
-    "captchaKey": "captchaKeyGoHere",
-    "siteKey": "siteKeygoHere"
+    "captchaKey": "<captchaKeyGoHere>",
+    "siteKey": "<siteKeygoHere>"
 }
