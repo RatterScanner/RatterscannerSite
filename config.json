@@ -1,6 +1,7 @@
 {
-    "apiKey": "apiKeyGoHere",
+    "apiKey": "apikeyGoHere",
     "port": "3000",
-    "maxCaptchas": 100,
-    "fileSizeLimit": 6
+    "fileSizeLimit": 6,
+    "captchaKey": "captchaKeyGoHere",
+    "siteKey": "siteKeygoHere"
 }

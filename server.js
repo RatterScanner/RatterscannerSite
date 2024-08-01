@@ -18,17 +18,17 @@ if (config == undefined) {
 
 const upload = multer();
 const app = express();
-let clientIDS = {};
-const captchaQueue = [];
-const maxCaptchaIds = config.maxCaptchas; // Limits the number of IDs that can be stored
 const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
 
 app.use(express.static("images"));
 app.set("view engine", "ejs");
 app.use(express.json());
 
+// --------------------------------------------------
+
+
 app.get("/", (req, res) => {
-    res.render("index");
+    res.render("index", {siteKey: config.siteKey});
 })
 
 app.get("/favicon.ico", (req, res) => {
@@ -75,20 +75,27 @@ app.get("/report", (req, res) => {
     });
 })
 
-app.post("/upload", upload.single("jarFile"), (req, res) => {
+app.post("/upload", upload.single("jarFile"), async (req, res) => {
   const { jarFile, captchaID, capAns } = req.body;
   const fileBuffer = req.file.buffer;
   const fileSize = req.file.size;
   const key = config.apiKey;
+  const response_key = req.body["g-recaptcha-response"];
+  const secret_key = config.captchaKey;
 
   console.log("Recieved file")
+
+  // Validate captcha
+  const captchaValid = await validateCaptcha(req);
+  if (!captchaValid) {
+    return res.status(400).send({ message: "Invalid captcha" });
+  }
 
   if (!req.file) {
     return res.status(400).send({ message: "No file uploaded" });
   }
   const magicNumber = fileBuffer.toString('hex', 0, 4);
 
-  
   if (magicNumber !== '504b0304') { // Check if a file is actually a jar file with magic bytes
     return res.status(400).send({ message: "Invalid JAR file" });
   }
@@ -100,16 +107,6 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
 
   if (fileSize / (1024 * 1024) > fileSizeLimit) {
     return res.status(400).send({ message: "Files cannot be larger than " + fileSizeLimit + " MB" });
-  }
-
-  if (captchaQueue.includes(captchaID) && capAns == clientIDS[captchaID]) {
-    const index = captchaQueue.indexOf(captchaID);
-    captchaQueue.splice(index, 1);
-    delete clientIDS[captchaID]
-  } else {
-    res.status(403).send({message: "Captcha incorrect"})
-    console.error("Captcha incorrect")
-    return;
   }
 
   const formData = new FormData();
@@ -161,42 +158,40 @@ app.post("/upload", upload.single("jarFile"), (req, res) => {
   formData.pipe(req2);
 });
 
-app.get("/captcha", function (req, res) {
-  if (captchaQueue.length >= maxCaptchaIds) {
-    // remove the oldest captcha ID if the limit is reached
-    const oldestCaptchaId = captchaQueue.shift();
-    delete clientIDS[oldestCaptchaId];
-  }
+const validateCaptcha = async (req) => {
+  const humanKey = req.body["g-recaptcha-response"];
+  console.log("Human key: " + humanKey)
 
-  if (Math.round(Math.random()) == 1){
-    const randomNumber = Math.floor(Math.random() * 3) + 4;
-    var captcha = svgCaptcha.create({
-      size: randomNumber,     
-      color: "true"
+  try {
+    const response = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
+      method: 'post',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+      },
+      body: `secret=${config.captchaKey}&response=${humanKey}`
     });
-  } else {
-    var captcha = svgCaptcha.createMathExpr({
-      color: "true"
-    });
+
+    const json = await response.json();
+    console.log(JSON.stringify(json))
+    const isHuman = json.success;
+
+    return isHuman;
+  } catch (err) {
+    console.error(`Error in Google Siteverify API: ${err.message}`);
+    return false;
   }
-
-  var captchaID = Math.random().toString(36).substring(2, 9); // Generate a random ID
-  var captchaText = captcha.text;
-   
-  clientIDS[captchaID] = captchaText;
-  captchaQueue.push(captchaID);
-
-  res.json({
-    id: captchaID,
-    svg: captcha.data.toString('utf8')
-  });
-});
+};
 
 app.get("/safe", function (req, res) {
   const data = JSON.parse(req.query.data);
   
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
 });
+
+app.get("/test", function (req, res) {
+  res.render("test", {siteKey: config.siteKey})
+})
 
 app.use(function (req, res, next) {
 	res.status(404).render("404")

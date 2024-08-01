@@ -15,6 +15,8 @@
 	<meta property="og:description" content="Scan a file or view a report details using its ID.">
 	<meta property="og:color" content="#ffffff">
 
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 	<style>
 		body {
 			font-family: Arial, sans-serif;
@@ -95,9 +97,6 @@
 		}
 	</style>
 	<script>
-		let captchaSvg; // global variable to store the svg
-		let captchaID; // global variable to store the id
-		let capAns; // global variable to store the captcha answer
 		let res;
 		let submitted = false;
 
@@ -107,17 +106,16 @@
 			}
 			let fileInput = document.getElementById("file");
 			let textInput = document.getElementById("text");
-			capAns = document.getElementById("capAnswer").value;
 			submitted = true;
 
 			if (fileInput.files.length > 0 && textInput.value !== "") {
 				alert("You cannot upload a file and check an ID at the same time");
 				submitted = false;
 			} else if (fileInput.files.length > 0) {
+				const response = grecaptcha.getResponse();
 				const formData = new FormData();
 				formData.append("jarFile", fileInput.files[0]);
-				formData.append("captchaID", captchaID);
-				formData.append("capAns", capAns);
+				formData.append("g-recaptcha-response", response)
 
 				document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
 
@@ -211,9 +209,7 @@
 				<!--This needs to look a lot better, but works for now-->
 			</div>
 			<div class="white">
-				<div id="captcha-container"></div>
-				<label for="capAnswer">Solve the captcha above (case sensitive):</label>
-				<input type="text" id="capAnswer" name="capAnswer"><br><br>
+				<div class="g-recaptcha" data-sitekey=<%= locals.siteKey %> ></div>
 			</div>
 			<div class="input-group">
 				<label for="text" style="color: #fff;">Enter an ID:</label>
