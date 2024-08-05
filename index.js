@@ -15,7 +15,8 @@ if (config == undefined) {
     "Program Terminated");
 }
 const key = config.apiKey; 
-if (key == null || key == "") { // Checks if the ratterscanner API key is invalid
+console.log(key)
+if (key == null || key == "" || key == "<apikeyGoHere>") { // Checks if the ratterscanner API key is invalid
   console.error("Key is null because of this the program cannot continue")
   throw new Error(
     "Program Terminated");
