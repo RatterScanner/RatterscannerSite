@@ -60,10 +60,6 @@ const validateCaptcha = async (req) => {
   }
 };
 
-app.use(function (req, res, next) {
-	res.status(404).render("404")
-});
-
 // --------------------------------------------------
 // Routes only beyond this point
 
@@ -195,6 +191,10 @@ app.get("/safe", function (req, res) {
   const data = JSON.parse(req.query.data);
   
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
+});
+
+app.use(function (req, res, next) {
+	res.status(404).render("404")
 });
 
 app.listen(config.port);
