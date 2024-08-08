@@ -1,6 +1,6 @@
 import express, { Express } from "express";
-import { randomBytes } from 'crypto';
-import { createHash, createHmac } from 'crypto';
+import { randomBytes } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 import { createChallenge, verifySolution } from 'altcha-lib';
 import https from "node:https";
 import multer from "multer";
