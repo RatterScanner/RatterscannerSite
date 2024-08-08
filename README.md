@@ -10,7 +10,6 @@ You can test the website directly from [here](https://scan.ratterscanner.com/).
 - Add the recaptcha site key and secret key to  "captchaKey": "<captchaKeyGoHere>" and "siteKey": "<siteKeygoHere>"
 - Make any other config changes 
 - Run `npm install` to download libraries
-- Run `npx tsc` to compile the typescript into js
 - Run `npm run start` to start the webserver.
 
 # Config
