@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import express, { Application } from 'express';
 import { randomBytes } from 'crypto';
 import { createHash, createHmac } from 'crypto';
 import { createChallenge, verifySolution } from 'altcha-lib';
@@ -39,7 +39,7 @@ if (!key || key === '' || key === '<apikeyGoHere>') {
 }
 
 const upload = multer();
-const app: Express = express();
+const app: Application = express();
 const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
 const hmacKey = randomBytes(16).toString('hex');
 
