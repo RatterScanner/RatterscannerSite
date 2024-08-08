@@ -1,10 +1,10 @@
 {
   "name": "ratterscannerfrontend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "start": "node index.js",
-    "devStart": "nodemon server.js"
+    "start": "node index.ts",
+    "devStart": "nodemon ./src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -14,9 +14,12 @@
     "ejs": "^3.1.10",
     "express": "^4.19.2",
     "form-data": "^4.0.0",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
     "nodemon": "^3.1.4"
   }
 }

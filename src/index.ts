@@ -1,41 +1,53 @@
-const express = require("express");
-const https = require("node:https");
-const multer = require("multer");
-const FormData = require("form-data");
-const fs = require("fs");
+import express, { Express } from "express";
+import https from "node:https";
+import multer from "multer";
+import FormData from "form-data";
+import fs from "fs";
 
-let config = undefined;
-
-const data = fs.readFileSync("config.json", "utf8");
-config = JSON.parse(data);
-
-if (config == undefined) {
-  console.error("Config is null and the program cannot continue")
-  throw new Error(
-    "Program Terminated");
-}
-const key = config.apiKey; 
-console.log(key)
-if (key == null || key == "" || key == "<apikeyGoHere>") { // Checks if the ratterscanner API key is invalid
-  console.error("Key is null because of this the program cannot continue")
-  throw new Error(
-    "Program Terminated");
+interface Config {
+  apiKey: string;
+  fileSizeLimit: number;
+  altchaKey: string;
+  captchaKey: string;
+  siteKey: string;
+  port: number;
 }
 
+let config: Config | undefined;
+
+try {
+  const data = fs.readFileSync('config.json', 'utf8');
+  config = JSON.parse(data);
+} catch (error) {
+  console.error('Error reading config file:', error);
+  throw new Error('Program Terminated');
+}
+
+if (!config) {
+  console.error('Config is null and the program cannot continue');
+  throw new Error('Program Terminated');
+}
+
+const key = config.apiKey;
+console.log(key);
+
+if (!key || key === '' || key === '<apikeyGoHere>') {
+  console.error('Key is null because of this the program cannot continue');
+  throw new Error('Program Terminated');
+}
 
 const upload = multer();
-const app = express();
+const app: Express = express();
 const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
 const hmacKey = config.altchaKey; // API key to act as an hmac key
 
-app.use(express.static("images"));
-app.set("view engine", "ejs");
+app.use(express.static('images'));
+app.set('view engine', 'ejs');
 app.use(express.json());
-
 // --------------------------------------------------
 // Put all functions here
 
-const validateCaptcha = async (req) => {
+const validateCaptcha = async (req: any) => {
   const humanKey = req.body["g-recaptcha-response"];
   console.log("Human key: " + humanKey)
 
@@ -54,7 +66,7 @@ const validateCaptcha = async (req) => {
     const isHuman = json.success;
 
     return isHuman;
-  } catch (err) {
+  } catch (err: any) {
     console.error(`Error in Google Siteverify API: ${err.message}`);
     return false;
   }
@@ -81,7 +93,7 @@ app.get("/report", (req, res) => {
 
     let url = "https://api.ratterscanner.com/status/" + appID;
 
-    function getData(url, callback) {
+    function getData(url: any, callback: any) {
         https.get(url, (res) => {
             let data = '';
             res.on('data', (chunk) => {
@@ -97,7 +109,7 @@ app.get("/report", (req, res) => {
         }); 
     }
 
-    getData(url, (jsonData) => {
+    getData(url, (jsonData: any) => {
         if (!jsonData) {
             res.status(500).render("error");
             return;
@@ -111,7 +123,7 @@ app.get("/report", (req, res) => {
     });
 })
 
-app.post("/upload", upload.single("jarFile"), async (req, res) => {
+app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
   const fileBuffer = req.file.buffer;
   const fileSize = req.file.size;
   
@@ -175,7 +187,7 @@ app.post("/upload", upload.single("jarFile"), async (req, res) => {
         res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
         return;
       }
-      const downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
+      let downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
       if (downloads == undefined) { // If the file has zero downloads or does not exist on modrinth 
         downloads = -1
       }
@@ -187,7 +199,7 @@ app.post("/upload", upload.single("jarFile"), async (req, res) => {
   formData.pipe(req2);
 });
 
-app.get("/safe", function (req, res) {
+app.get("/safe", function (req: any, res: any) {
   const data = JSON.parse(req.query.data);
   
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
