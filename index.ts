@@ -98,7 +98,7 @@ app.get("/", (req: any, res: any) => {
     res.render("index", {siteKey: config.siteKey, hKey: hmacKey});
 })
 
-app.get("/favicon.ico", (req, res) => {
+app.get("/favicon.ico", (req: any, res: any) => {
 	res.download("https://ratterscanner.com/favicon.ico")
 })
 
