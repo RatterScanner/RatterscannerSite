@@ -1,4 +1,7 @@
 import express, { Express } from "express";
+import { randomBytes } from 'crypto';
+import { createHash, createHmac } from 'crypto';
+import { createChallenge, verifySolution } from 'altcha-lib';
 import https from "node:https";
 import multer from "multer";
 import FormData from "form-data";
@@ -29,7 +32,6 @@ if (!config) {
 }
 
 const key = config.apiKey;
-console.log(key);
 
 if (!key || key === '' || key === '<apikeyGoHere>') {
   console.error('Key is null because of this the program cannot continue');
@@ -39,7 +41,7 @@ if (!key || key === '' || key === '<apikeyGoHere>') {
 const upload = multer();
 const app: Express = express();
 const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
-const hmacKey = config.altchaKey; // API key to act as an hmac key
+const hmacKey = randomBytes(16).toString('hex');
 
 app.use(express.static('images'));
 app.set('view engine', 'ejs');
@@ -49,7 +51,6 @@ app.use(express.json());
 
 const validateCaptcha = async (req: any) => {
   const humanKey = req.body["g-recaptcha-response"];
-  console.log("Human key: " + humanKey)
 
   try {
     const response = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
@@ -62,7 +63,6 @@ const validateCaptcha = async (req: any) => {
     });
 
     const json = await response.json();
-    console.log(JSON.stringify(json))
     const isHuman = json.success;
 
     return isHuman;
@@ -72,11 +72,30 @@ const validateCaptcha = async (req: any) => {
   }
 };
 
+async function hmacSha256(message: any, key: any) {
+  const encoder = new TextEncoder();
+  const encodedMessage = encoder.encode(message);
+  const encodedKey = encoder.encode(key);
+
+  const hmac = await crypto.subtle.importKey(
+    "raw",
+    encodedKey,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signatureBuffer = await crypto.subtle.sign("HMAC", hmac, encodedMessage);
+  const signatureArray = Array.from(new Uint8Array(signatureBuffer));
+  const signatureHex = signatureArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+  return signatureHex;
+}
+
 // --------------------------------------------------
 // Routes only beyond this point
 
 app.get("/", (req, res) => {
-    res.render("index", {siteKey: config.siteKey});
+    res.render("index", {siteKey: config.siteKey, hKey: hmacKey});
 })
 
 app.get("/favicon.ico", (req, res) => {
@@ -124,6 +143,59 @@ app.get("/report", (req, res) => {
 })
 
 app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
+  // ---------------------------- POW rate limiting
+  const authorization = req.get("Authorization");
+  if (authorization == undefined) {
+    try {
+      // Generate a new random challenge with a specified complexity
+      const challenge = await createChallenge({
+        hmacKey: hmacKey,
+        maxNumber: 250000
+      })
+  
+      // Return the generated challenge as JSON
+      res.status(401).send({WWW_Authenticate: {challenge}})
+      return;
+    } catch (error: any) {
+      // Handle any errors that occur during challenge creation
+      res.status(500).send({
+        error: 'Failed to create challenge',
+        details: error.message
+      })
+      console.error("Failed to create challenge: " + error.message)
+      return;
+    }
+  }
+
+  try {
+    const authorization = req.get("Authorization");
+    const payload = Buffer.from(authorization.split(' ')[1], 'base64').toString('utf8');
+    const data = JSON.parse(payload);
+  
+    const algOk = data.algorithm === 'SHA-256';
+    const hash = createHash('sha256');
+    hash.update(`${data.salt}${data.number}`);
+    const challengeHash = hash.digest('hex');
+    const challengeOk = challengeHash === data.challenge;
+
+    // Generate the HMAC signature using the hmacSha256 function
+    const hmacSignature = await hmacSha256(`${data.salt}${data.number}`, hmacKey);
+    const signatureOk = hmacSignature === data.signature;
+
+    const verified = algOk && challengeOk && signatureOk;
+  
+    if (!verified) {
+      res.status(400).send("Validation failed");
+      return;
+    }
+  
+  } catch (error: any) {
+    console.error(error)
+    res.status(500).send("Internal server error")
+    return;
+  }
+  // ---------------------------
+
   const fileBuffer = req.file.buffer;
   const fileSize = req.file.size;
   
