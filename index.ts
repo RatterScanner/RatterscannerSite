@@ -94,7 +94,7 @@ async function hmacSha256(message: any, key: any) {
 // --------------------------------------------------
 // Routes only beyond this point
 
-app.get("/", (req, res) => {
+app.get("/", (req: any, res: any) => {
     res.render("index", {siteKey: config.siteKey, hKey: hmacKey});
 })
 
@@ -102,7 +102,7 @@ app.get("/favicon.ico", (req, res) => {
 	res.download("https://ratterscanner.com/favicon.ico")
 })
 
-app.get("/report", (req, res) => {
+app.get("/report", (req: any, res: any) => {
     let appID = req.query.appID;
     let downloadCount = req.query.downloads;
     if (appID == undefined){
@@ -277,7 +277,7 @@ app.get("/safe", function (req: any, res: any) {
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
 });
 
-app.use(function (req, res, next) {
+app.use(function (req: any, res: any) {
 	res.status(404).render("404")
 });
 
