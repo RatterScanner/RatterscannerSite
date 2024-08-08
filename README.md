@@ -7,7 +7,7 @@ You can test the website directly from [here](https://scan.ratterscanner.com/).
 ## Running
 
 - Rename the config-example.json file to config.json and add your API key to "apiKey": "<apikeyGoHere>",
-- Add the recaptcha site key and secret key to  "captchaKey": "<captchaKeyGoHere>" and "siteKey": "<siteKeygoHere>"
+- Add the cloudflare turnstile site key and secret key to  "captchaKey": "<secretKeyGoHere>" and "siteKey": "<siteKeygoHere>"
 - Make any other config changes 
 - Run `npm install` to download libraries
 - Run `npm run start` to start the webserver.
