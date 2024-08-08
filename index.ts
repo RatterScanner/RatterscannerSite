@@ -1,4 +1,5 @@
 import express, { Express } from "express";
+import * as crypto from 'crypto';
 import { randomBytes } from "node:crypto";
 import { createHash, createHmac } from "node:crypto";
 import { createChallenge, verifySolution } from 'altcha-lib';
@@ -6,7 +7,6 @@ import https from "node:https";
 import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
-const crypto = require("crypto");
 
 interface Config {
   apiKey: string;
