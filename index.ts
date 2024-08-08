@@ -53,7 +53,7 @@ const validateCaptcha = async (req: any) => {
   const humanKey = req.body["g-recaptcha-response"];
 
   try {
-    const response = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
+    const response = await fetch(`https://challenges.cloudflare.com/turnstile/v0/siteverify`, {
       method: 'post',
       headers: {
         Accept: 'application/json',

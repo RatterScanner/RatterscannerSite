@@ -15,7 +15,7 @@
 	<meta property="og:description" content="Scan a file or view a report details using its ID.">
 	<meta property="og:color" content="#ffffff">
 
-	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+	<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
 
 	<style>
 		body {
@@ -126,7 +126,7 @@
                 if (response.status === 401) {
 					resultDiv.innerText = "Validating";
 					document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
-					
+
                     const challengeResponse = await response.json();
                     const challenge = challengeResponse.WWW_Authenticate.challenge;
                     const salt = challenge.salt;
