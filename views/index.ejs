@@ -123,8 +123,8 @@
                     },
                 });
 
+				resultDiv.innerText = "Validating";
                 if (response.status === 401) {
-					resultDiv.innerText = "Validating";
 					document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
 
                     const challengeResponse = await response.json();
@@ -143,6 +143,7 @@
                     }
 					
                     if (solution !== undefined) {
+						resultDiv.innerText = "Uploading file";
                         const hmacKey = "<%= hKey %>";
                         const signature = await hmacSha256(`${salt}${solution}`, hmacKey);
 
