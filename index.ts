@@ -140,7 +140,7 @@ app.get("/report", (req: any, res: any) => {
         if (jsonData.state == "completed"){
             completed = true;
         }
-        res.render("report", {completed: completed, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
+        res.render("report", {completed: completed, percentage: jsonData.progress.regex.percentageCompleted, status: jsonData.progress.networkAnalysis.status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
 })
 

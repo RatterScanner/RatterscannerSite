@@ -167,13 +167,17 @@
 <body>
 
 	<% if (!(locals.completed)) { %>
-	<div class="center">
+	<div class="center white">
 		<img src=<%=locals.gifName || "Loading" %> alt="loading"> <br>
 		<script>
 			setTimeout(() => {
 				location.reload()
-			}, 10000);
+			}, 5000);
 		</script>
+	</div>
+	<div class="center white">
+		Static analysis status: <%= locals.percentage %>% complete </br>
+		Dynamic analysis status: <%= locals.status %>
 	</div>
 
 	<% } else { %>
