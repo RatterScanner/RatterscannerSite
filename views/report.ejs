@@ -244,24 +244,34 @@
 		</button>
 		<div class="content">
 			<div class="flags">
-				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
-				<div class="flag safe">
-					<div class="flag-color"></div>
-					<div class="container">
-						No malicious connection were made.
+				<% try { %> 
+					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							No malicious connection were made.
+						</div>
 					</div>
-				</div>
-				<% } else { %>
-				<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
-				<div class="flag critical">
-					<div class="flag-color"></div>
-					<div class="container">
-						<%= flag %>
-						<br>
+					<% } else { %>
+					<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%= flag %>
+							<br>
+						</div>
 					</div>
-				</div>
-				<% }); %>
-				<% } %>
+					<% }); %>
+					<% } %>
+				<% } catch { %>
+					<% console.error("Could not read malicious connections"); %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							No malicious connection were made.
+						</div>
+					</div>
+				<% } %>  
 			</div>
 		</div>
 	</div>
@@ -273,24 +283,34 @@
 		</button>
 		<div class="content">
 			<div class="flags">
-				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
-				<div class="flag safe">
-					<div class="flag-color"></div>
-					<div class="container">
-						No unknown connection were made.
+				<% try { %> 
+					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							No unknown connection were made.
+						</div>
 					</div>
-				</div>
-				<% } else { %>
-				<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
-				<div class="flag warning">
-					<div class="flag-color"></div>
-					<div class="container">
-						<%= flag %>
-						<br>
+					<% } else { %>
+					<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
+					<div class="flag warning">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%= flag %>
+							<br>
+						</div>
 					</div>
-				</div>
-				<% }); %>
-				<% } %>
+					<% }); %>
+					<% } %>
+				<% } catch { %>
+					<% console.error("Could not read unknown connections"); %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							No unknown connection were made.
+						</div>
+					</div>
+				<% } %> 
 			</div>
 		</div>
 	</div>
