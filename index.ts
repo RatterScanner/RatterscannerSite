@@ -7,7 +7,11 @@ import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
 
-globalThis.crypto = require("node:crypto").webcrypto;
+try {
+  globalThis.crypto = require("node:crypto").webcrypto; // This is needed for older versions of nodeJS that do not have a global declaration of crypto
+} catch {
+
+}
 
 interface Config {
   apiKey: string;
@@ -253,13 +257,17 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
       let fileSource
   
       if (jsonData.status == "File found in safe list, not scanning") { // The file has been manually marked as safe by a human
-        if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
-          fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
-        } else {
-          fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
+        try {
+          if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
+            fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
+          } else {
+            fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
+          }
+          res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
+          return;
+        } catch {
+          fileSource = "None";
         }
-        res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
-        return;
       }
       let downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
       if (downloads == undefined) { // If the file has zero downloads or does not exist on modrinth 
