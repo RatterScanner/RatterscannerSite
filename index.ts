@@ -44,9 +44,14 @@ if (!key || key === '' || key === '<apikeyGoHere>') {
   throw new Error('Program Terminated');
 }
 
-const upload = multer();
-const app: any = express();
 const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: fileSizeLimit * 1024 * 1024,
+  },
+});
+const app: any = express();
 const hmacKey = randomBytes(16).toString('hex');
 
 app.use(express.static('images'));
@@ -228,10 +233,11 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
 
   const formData = new FormData();
   formData.append("file", fileBuffer, {
-    contentType: "application/octet-stream",
     filename: req.file.originalname
   });
-
+  
+  console.log("Sending to ratterscanner")
+  
   const options = {
     method: "POST",
     hostname: "api.ratterscanner.com",
@@ -241,11 +247,12 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
       "api_key": key,
     }, formData.getHeaders())
   };
+  
   let ID;
-
+  
   const req2 = https.request(options, (res2) => {
     let data = "";
-  
+    console.log("Request sent")
     res2.on("data", (chunk) => { 
       console.log("Recived chunk: " + chunk)
       data += chunk;
@@ -277,7 +284,7 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
       res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID, downloads: downloads});
     });
   });
-
+  
   formData.pipe(req2);
 });
 
