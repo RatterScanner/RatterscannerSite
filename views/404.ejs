@@ -41,6 +41,48 @@
 			background-color: #569cd8;
 			transform: scale(1.025);
 		}
+
+		.noticeContainer {
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			text-align: center;
+			padding: 10px;
+		}
+
+		.noticeContainer > div {
+			display: inline-block;
+		}
+
+		.noticeContainer > div > * {
+			display: inline;
+		}
+
+		.mb-2 {
+			margin-bottom: 0.5rem;
+		}
+
+		.text-gray-300 {
+			color: #d1d5db;
+		}
+
+		.text-gray-300:hover {
+			color: #ffffff;
+		}
+
+		.mx-2 {
+			margin-left: 0.5rem;
+			margin-right: 0.5rem;
+		}
+
+		.text-gray-500 {
+			color: #737373;
+		}
+
+		.text-sm {
+			font-size: 0.875rem;
+		}
 	</style>
 </head>
 
@@ -48,6 +90,12 @@
 	<h1 style="margin-bottom: 5px; margin-top: 40px;">Error 404</h1>
 	<h3 style="margin-bottom: 40px;">The content you searched doesn't exist.</h3>
 	<button class="button" onclick="location.href='/'">Go Back</button>
+	<div class="noticeContainer mx-auto">
+		<div class="mb-2">
+			<a href="/terms" class="text-gray-300 hover:text-white mx-2">Terms and Conditions</a>
+			<span class="text-gray-500">|</span><a href="/privacy" class="text-gray-300 hover:text-white mx-2">Privacy Policy</a>
+		</div>
+		<p class="text-gray-500 text-sm">© 2023 RatterScanner. All rights reserved.</p>
+	</div>
 </body>
-
 </html>
