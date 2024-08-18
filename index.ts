@@ -159,8 +159,19 @@ app.get("/report", (req: any, res: any) => {
         } catch {
           percentComplete = -1;
         }
+
+        let status;
+        try {
+          status = jsonData.progress.networkAnalysis.status;
+          if (!(status == undefined)) {
+            status = "loading";
+          }
+
+        } catch {
+          status = "loading";
+        }
         
-        res.render("report", {completed: completed, percentage: percentComplete, status: jsonData.progress.networkAnalysis.status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
+        res.render("report", {completed: completed, percentage: percentComplete, status: status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
 })
 
