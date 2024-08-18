@@ -164,11 +164,11 @@ app.get("/report", (req: any, res: any) => {
         try {
           status = jsonData.progress.networkAnalysis.status;
           if (!(status == undefined)) {
-            status = "loading";
+            status = "File not scanned before, adding to scan queue";
           }
 
         } catch {
-          status = "loading";
+          status = "File not scanned before, adding to scan queue";
         }
         
         res.render("report", {completed: completed, percentage: percentComplete, status: status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
