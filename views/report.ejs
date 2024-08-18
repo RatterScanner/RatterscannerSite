@@ -217,6 +217,9 @@
 		</script>
 	</div>
 	<div class="center white">
+		<% if (locals.percentage == -1)  {%>
+			Another file is in the que, please wait <!--IDk if this is how the API responds when there is a file already in the que-->
+		<% } %> 
 		Static analysis status: <%= locals.percentage %>% complete </br>
 		Dynamic analysis status: <%= locals.status %>
 	</div>
