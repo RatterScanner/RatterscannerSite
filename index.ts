@@ -25,23 +25,23 @@ interface Config {
 let config: Config | undefined;
 
 try {
-  const data = fs.readFileSync('config.json', 'utf8');
+  const data = fs.readFileSync("config.json", "utf8");
   config = JSON.parse(data);
 } catch (error) {
-  console.error('Error reading config file:', error);
-  throw new Error('Program Terminated');
+  console.error("Error reading config file:", error);
+  throw new Error("Program Terminated");
 }
 
 if (!config) {
-  console.error('Config is null and the program cannot continue');
-  throw new Error('Program Terminated');
+  console.error("Config is null and the program cannot continue");
+  throw new Error("Program Terminated");
 }
 
 const key = config.apiKey;
 
-if (!key || key === '' || key === '<apikeyGoHere>') {
-  console.error('Key is null because of this the program cannot continue');
-  throw new Error('Program Terminated');
+if (!key || key === "" || key === "<apikeyGoHere>") {
+  console.error("Key is null because of this the program cannot continue");
+  throw new Error("Program Terminated");
 }
 
 const fileSizeLimit = config.fileSizeLimit; // The maximum file size an uploaded file can have (In MB)
@@ -52,10 +52,11 @@ const upload = multer({
   },
 });
 const app: any = express();
-const hmacKey = randomBytes(16).toString('hex');
+const hmacKey = randomBytes(16).toString("hex");
+let captchaList : any = {};
 
-app.use(express.static('images'));
-app.set('view engine', 'ejs');
+app.use(express.static("images"));
+app.set('view engine', "ejs");
 app.use(express.json());
 // --------------------------------------------------
 // Put all functions here
@@ -106,7 +107,7 @@ async function hmacSha256(message: any, key: any) {
 // Routes only beyond this point
 
 app.get("/", (req: any, res: any) => {
-    res.render("index", {siteKey: config.siteKey, hKey: hmacKey});
+    res.render("index", {siteKey: config.siteKey});
 })
 
 app.get("/favicon.ico", (req: any, res: any) => {
@@ -175,26 +176,28 @@ app.get("/report", (req: any, res: any) => {
     });
 })
 
-app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
+app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { // TODO: debloat this class
   // ---------------------------- POW rate limiting
   const authorization = req.get("Authorization");
   if (authorization == undefined) {
+    let expiration = new Date(Date.now() + 2 * 60 * 1000); // 2 mins from now
+    let captchaID = Math.random().toString(36).substring(2, 9);
     try {
-      // Generate a new random challenge with a specified complexity
-      const challenge = await createChallenge({
+      const challenge = await createChallenge({ // Generate a new random challenge with a specified complexity
         hmacKey: hmacKey,
         maxNumber: 250000
-      })
+      }); // TODO: Increace the challenge complexity based on factors like load, number of requests etc
   
-      // Return the generated challenge as JSON
-      res.status(401).send({WWW_Authenticate: {challenge}})
+      captchaList[captchaID] = {
+        challenge: challenge,
+        hmacKey: hmacKey,
+        expires: expiration
+      }
+
+      res.status(401).send({WWW_Authenticate: {challenge}, ID: captchaID})
       return;
     } catch (error: any) {
-      // Handle any errors that occur during challenge creation
-      res.status(500).send({
-        error: 'Failed to create challenge',
-        details: error.message
-      })
+      res.status(500).send({error: 'Failed to create challenge'})
       console.error("Failed to create challenge: " + error.message)
       return;
     }
@@ -202,26 +205,46 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => {
 
   try {
     const authorization = req.get("Authorization");
-    const payload = Buffer.from(authorization.split(' ')[1], 'base64').toString('utf8');
+    const payload = Buffer.from(authorization.split(' ')[1], "base64").toString("utf8");
     const data = JSON.parse(payload);
+    const currentTime = new Date();
   
-    const algOk = data.algorithm === 'SHA-256';
-    const hash = createHash('sha256');
-    hash.update(`${data.salt}${data.number}`);
-    const challengeHash = hash.digest('hex');
-    const challengeOk = challengeHash === data.challenge;
+    const captchaID = data.id;
+    const solution = data.solution;
+    const salt = data.salt;
+    const challenge = data.challenge;
 
-    // Generate the HMAC signature using the hmacSha256 function
-    const hmacSignature = await hmacSha256(`${data.salt}${data.number}`, hmacKey);
-    const signatureOk = hmacSignature === data.signature;
+    let captcha = captchaList[captchaID];
 
-    const verified = algOk && challengeOk && signatureOk;
-  
-    if (!verified) {
-      res.status(400).send("Validation failed");
+    if (!(captcha)) {
+      res.status(401).send({ message: "Invalid captcha" });
       return;
     }
   
+    // Challenge validation
+    const recomputedChallenge = createHash("sha256");
+    recomputedChallenge.update(`${salt}${solution}`);
+    const recomputedChallengeHex = recomputedChallenge.digest("hex");
+  
+    if (recomputedChallengeHex !== challenge) {
+      res.status(401).send({ message: "Invalid challenge solution" });
+      return;
+    }
+  
+    // Signature validation
+    const signature = createHmac("sha256", hmacKey);
+    signature.update(challenge);
+    const expectedSignatureHex = signature.digest("hex");
+    if (captcha.challenge.signature !== expectedSignatureHex) {
+      res.status(401).send({ message: "Invalid signature" });
+      return;
+    }
+  
+    if (!(captcha.expires > currentTime)) {
+      res.status(401).send({ message: "expired challenge" });
+    }
+
+   delete captchaList[captchaID];
   } catch (error: any) {
     console.error(error)
     res.status(500).send("Internal server error")

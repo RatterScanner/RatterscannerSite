@@ -9,6 +9,7 @@
 	<link rel="icon" href="https://ratterscanner.com/favicon.ico">
 	<link rel="manifest" href="https://ratterscanner.com/manifest.json">
 	<link rel="apple-touch-icon" href="https://ratterscanner.com/logo192.png">
+	<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
 
 	<meta property="og:type" content="website">
 	<meta property="og:site_name" content="RatterScanner | Scan">
@@ -170,36 +171,34 @@
                 if (response.status === 401) {
 					document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
 
-                    const challengeResponse = await response.json();
-                    const challenge = challengeResponse.WWW_Authenticate.challenge;
-                    const salt = challenge.salt;
-                    const maxNumber = challenge.maxnumber;
-                    const algorithm = challenge.algorithm;
+					const challengeResponse = await response.json();
+					const challenge = challengeResponse.WWW_Authenticate.challenge;
+					const salt = challenge.salt;
+					const maxNumber = challenge.maxnumber;
+					const algorithm = challenge.algorithm;
+					const id = challengeResponse.ID;
 
-                    let solution;
-                    for (let i = 0; i <= maxNumber; i++) {
-                        const hash = await sha256(`${salt}${i}`);
-                        if (hash === challenge.challenge) {
-                            solution = i;
-                            break;
-                        }
-                    }
-					
-                    if (solution !== undefined) {
-						resultDiv.innerText = "Uploading file";
-                        const hmacKey = "<%= hKey %>";
-                        const signature = await hmacSha256(`${salt}${solution}`, hmacKey);
+					let solution;
+					for (let i = 0; i < maxNumber; i++) {
+						const concatenatedString = salt + i.toString();
+						const hash = CryptoJS.SHA256(concatenatedString);
+						const hashedString = hash.toString(CryptoJS.enc.Hex);
 
-                        const authData = {
-                            algorithm,
-                            number: solution,
-                            challenge: challenge.challenge,
-                            salt,
-                            signature
-                            };
+						if (hashedString === challenge.challenge) {
+						solution = i;
+						break;
+						}
+					}
 
-                        const authHeader = `Altcha ${btoa(JSON.stringify(authData))}`;
+					if (solution !== undefined) {
+							const authData = {
+							id: id,
+							solution: solution,
+							salt: salt,
+							challenge: challenge.challenge,
+						};
 
+						const authHeader = `Altcha ${btoa(JSON.stringify(authData))}`;
                         const response = grecaptcha.getResponse();
 						const formData = new FormData();
 						formData.append("jarFile", fileInput.files[0]);
