@@ -146,6 +146,7 @@
 			}
 
 		}
+
 		.noticeContainer {
 			position: fixed;
 			bottom: 0;
@@ -155,11 +156,11 @@
 			padding: 10px;
 		}
 
-		.noticeContainer > div {
+		.noticeContainer>div {
 			display: inline-block;
 		}
 
-		.noticeContainer > div > * {
+		.noticeContainer>div>* {
 			display: inline;
 		}
 
@@ -199,7 +200,7 @@
 		}
 	</style>
 	<script>
-		function back(){
+		function back() {
 			window.location.href = "/"
 		}
 	</script>
@@ -228,22 +229,29 @@
 	</div>
 
 	<div class="category white">
-		<i>Click on a box to expand it</i>
 		<button type="button" class="collapsible">
 			<h3>Static analysis</h3>
 		</button>
 		<div class="content">
 			<div class="flags">
-				 <% if (locals.downloads > 10000) { %> 
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							This mod was found on modrinth with 10K+ downloads, it is most likley safe.
-						</div>
+				<% if (locals.downloads > 10000) { %>
+				<div class="flag safe">
+					<div class="flag-color"></div>
+					<div class="container">
+						This mod was found on modrinth with 10K+ downloads, it is most likely safe.
 					</div>
-				<% } %> 
+				</div>
+				<% } %>
 
-				<% if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %> <!--TODO, fix this-->
+				<% if (!jsonReport.returnvalue.regex.flagsTriggered) { %>
+				<% console.error(`Could not read flags for id ${locals.appID}`); %>
+				<div class="flag critical">
+					<div class="flag-color"></div>
+					<div class="container">
+						This mod couldn't be scanned.
+					</div>
+				</div>
+				<% } else if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
 				<div class="flag safe">
 					<div class="flag-color"></div>
 					<div class="container">
@@ -259,7 +267,8 @@
 				<div class="flag critical">
 					<div class="flag-color"></div>
 					<div class="container">
-						Known malicious software identified as: <%= flag.description %> <div style="color: red;">THIS FILE IS MALICIOUS DO NOT USE</div>
+						Known malicious software identified as: <b><%= flag.description %></b>
+						<div style="color: red;">This file is malicious!</div>
 						<br>
 					</div>
 				</div>
@@ -285,34 +294,34 @@
 		</button>
 		<div class="content">
 			<div class="flags">
-				<% try { %> 
-					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							No malicious connections were made.
-						</div>
+				<% try { %>
+				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
+				<div class="flag safe">
+					<div class="flag-color"></div>
+					<div class="container">
+						No malicious connections were made.
 					</div>
-					<% } else { %>
-					<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							<%= flag %>
-							<br>
-						</div>
+				</div>
+				<% } else { %>
+				<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
+				<div class="flag critical">
+					<div class="flag-color"></div>
+					<div class="container">
+						<%= flag %>
+						<br>
 					</div>
-					<% }); %>
-					<% } %>
+				</div>
+				<% }); %>
+				<% } %>
 				<% } catch { %>
-					<% console.error("Could not read malicious connections"); %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							No malicious connections were made.
-						</div>
+				<% console.error(`Could not read malicious connections for id ${locals.appID}`); %>
+				<div class="flag critical">
+					<div class="flag-color"></div>
+					<div class="container">
+						This mod couldn't be scanned.
 					</div>
-				<% } %>  
+				</div>
+				<% } %>
 			</div>
 		</div>
 	</div>
@@ -320,38 +329,38 @@
 
 	<div class="category white">
 		<button type="button" class="collapsible">
-			<h3>Unkown connections</h3>
+			<h3>Unknown connections</h3>
 		</button>
 		<div class="content">
 			<div class="flags">
-				<% try { %> 
-					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							No unknown connections were made.
-						</div>
+				<% try { %>
+				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
+				<div class="flag safe">
+					<div class="flag-color"></div>
+					<div class="container">
+						No unknown connections were made.
 					</div>
-					<% } else { %>
-					<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
-					<div class="flag warning">
-						<div class="flag-color"></div>
-						<div class="container">
-							<%= flag %>
-							<br>
-						</div>
+				</div>
+				<% } else { %>
+				<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
+				<div class="flag warning">
+					<div class="flag-color"></div>
+					<div class="container">
+						<%= flag %>
+						<br>
 					</div>
-					<% }); %>
-					<% } %>
+				</div>
+				<% }); %>
+				<% } %>
 				<% } catch { %>
-					<% console.error("Could not read unknown connections"); %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							No unknown connections were made.
-						</div>
+				<% console.error(`Could not read unknown connections for id ${locals.appID}`); %>
+				<div class="flag critical">
+					<div class="flag-color"></div>
+					<div class="container">
+						This mod couldn't be scanned.
 					</div>
-				<% } %> 
+				</div>
+				<% } %>
 			</div>
 		</div>
 	</div>
@@ -361,6 +370,10 @@
 			<h3>File info</h3>
 		</button>
 		<div class="content">
+			<% if (!jsonReport.returnvalue.regex.fileProperties) { %>
+			<% console.error(`Could not read file properties for id ${locals.appID}`); %>
+			<p>This scan does not contain file properties.</p>
+			<% } else { %>
 			<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
 			<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
 			<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
@@ -368,6 +381,7 @@
 			<p>
 				Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
 			</p>
+			<% } %>
 		</div>
 	</div>
 
@@ -393,7 +407,7 @@
 			<a href="https://ratterscanner.com/terms" class="text-gray-300 hover:text-white mx-2">Terms and Conditions</a>
 			<span class="text-gray-500">|</span><a href="https://ratterscanner.com/privacy" class="text-gray-300 hover:text-white mx-2">Privacy Policy</a>
 		</div>
-		<p class="text-gray-500 text-sm">© 2023 RatterScanner. All rights reserved.</p>
+		<p class="text-gray-500 text-sm">© 2024 RatterScanner. All rights reserved.</p>
 	</div>
 </body>
 
