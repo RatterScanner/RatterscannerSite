@@ -229,6 +229,7 @@
 							clearTimeout(timeoutId);
 							if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
 								alert(data.message);
+								resultDiv.innerText = "Validating";
 								document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
 							} else if(data.message.includes("File is safe")) {
 								const sendData = {
