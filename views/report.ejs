@@ -217,12 +217,8 @@
 		</script>
 	</div>
 	<div class="center white">
-		<% if (locals.status == "File not scanned before, adding to scan queue")  {%>
-			Another file is in the que, please wait <!--IDk if this is how the API responds when there is a file already in the que-->
-		<% } else { %>
-			Static analysis status: <%= locals.percentage %>% complete </br>
-			Dynamic analysis status: <%= locals.status %>
-		<% } %> 
+		Static analysis status: <%= locals.percentage || "File is in scan que please wait" %>% complete </br>
+		Dynamic analysis status: <%= locals.status || "File is in scan que please wait" %>
 	</div>
 
 	<% } else { %>
