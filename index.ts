@@ -253,8 +253,6 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
   // ---------------------------
 
   const fileBuffer = req.file.buffer;
-  const fileSize = req.file.size;
-  
   console.log("Recieved file")
 
   // Validate captcha
@@ -270,10 +268,6 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
 
   if (magicNumber !== '504b0304') { // Check if a file is actually a jar file with magic bytes
     return res.status(400).send({ message: "Invalid JAR file" });
-  }
-
-  if (fileSize / (1024 * 1024) > fileSizeLimit) {
-    return res.status(400).send({ message: "Files cannot be larger than " + fileSizeLimit + " MB" });
   }
 
   const formData = new FormData();
@@ -337,6 +331,18 @@ app.get("/safe", function (req: any, res: any) {
   const data = JSON.parse(req.query.data);
   
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
+});
+
+app.use((err : any, req : any, res : any, next : any) => { // Catch Files that are too large
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      res.status(400).send({ message: "Files cannot be larger than: " + fileSizeLimit + "MB" });
+    } else {
+      res.status(500).send({ message: "Error uploading file" });
+    }
+  } else {
+    next(err);
+  }
 });
 
 app.use(function (req: any, res: any) {
