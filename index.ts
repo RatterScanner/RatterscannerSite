@@ -161,16 +161,7 @@ app.get("/report", (req: any, res: any) => {
           percentComplete = -1;
         }
 
-        let status;
-        try {
-          status = jsonData.progress.networkAnalysis.status;
-          if (!(status == undefined)) {
-            status = "File not scanned before, adding to scan queue";
-          }
-
-        } catch {
-          status = "File not scanned before, adding to scan queue";
-        }
+        let status = jsonData.progress.networkAnalysis.status;
         
         res.render("report", {completed: completed, percentage: percentComplete, status: status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
