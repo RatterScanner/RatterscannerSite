@@ -5,7 +5,7 @@ import { createChallenge, verifySolution } from 'altcha-lib';
 import https from "node:https";
 import multer from "multer";
 import FormData from "form-data";
-import fs from "fs";
+import fs from "fs";;
 
 try {
   globalThis.crypto = require("node:crypto").webcrypto; // This is needed for older versions of nodeJS that do not have a global declaration of crypto
