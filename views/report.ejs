@@ -88,6 +88,10 @@
 			background-color: green;
 		}
 
+		.info .flag-color {
+			background-color: white;
+		}
+
 		.button {
 			background-color: #337ab7;
 			color: #fff;
@@ -220,16 +224,26 @@
 		</div>
 		<div class="center white">
 			<% if (locals.completed == "waiting") { %>
+<<<<<<< HEAD
 				Another file is in the que, please wait </br>
 				Your position in the que: <%= locals.quePosition || "Error getting que position please report this to a developer" %>			
 			<% } else{ %> 
 				Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
 				Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
 			<% } %> 
+=======
+			Another file is in the que, please wait </br>
+			Your position in the que: <% locals.position || "Error getting position, please report this to a developer" %>
+			<% } else { %>
+			Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
+			Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
+			<% } %>
+>>>>>>> 8daac4e95228dd8336e5b37bef6a58f58f05afa2
 		</div>
 
 		<% } else { %>
 		<button class="button dark-blue" style="color: #fff;" onclick="window.location.href = '/'">Go back</button>
+		<button class="button dark-blue" style="color: #fff;" onclick="toggleAdditionalInfos()" id="btn-addtinfo">Enable Additional Infos</button>
 		<div class="center white">
 			<h2>Report for ID: <%= locals.appID %></h2>
 		</div>
@@ -249,54 +263,62 @@
 					</div>
 					<% } %>
 					<% try { %>
-						<% if (jsonReport && jsonReport.returnvalue && jsonReport.returnvalue.regex && jsonReport.returnvalue.regex.flagsTriggered) { %>
-						  <% if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
-							<div class="flag safe">
-							  <div class="flag-color"></div>
-							  <div class="container">
-								The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
-							  </div>
-							</div>
-						  <% } else { %>
-							<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
-							  <% if (flag.level >= 1) { %>
-								<% if (flag.level == 5) { %>
-								  <div class="flag critical">
-									<div class="flag-color"></div>
-									<div class="container">
-									  Known malicious software identified as: <b><%= flag.description %></b>
-									  <br>
-									</div>
-								  </div>
-								<% } else { %>
-								  <div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
-									<div class="flag-color"></div>
-									<div class="container">
-									  <%= flag.description.replace(/`([^`]+)`/g, '$1') %>
-									  <br>
-									</div>
-								  </div>
-								<% } %>
-							  <% } %>
-							<% }); %>
-						  <% } %>
-						<% } else { %>
-						  <div class="flag critical">
-							<div class="flag-color"></div>
-							<div class="container">
-							  This mod couldn't be scanned.
-							</div>
-						  </div>
-						<% } %>
-					  <% } catch (error) { %>
-						<div class="flag critical">
-						  <div class="flag-color"></div>
-						  <div class="container">
-							An error occurred while scanning the mod: <%= error.message %>
-						  </div>
+					<% if (jsonReport && jsonReport.returnvalue && jsonReport.returnvalue.regex && jsonReport.returnvalue.regex.flagsTriggered) { %>
+					<% if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
 						</div>
-					  <% } %>
-						 
+					</div>
+					<% } else { %>
+					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+					<% if (flag.level >= 1) { %>
+					<% if (flag.level == 5) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							Known malicious software identified as: <b><%= flag.description %></b>
+							<br>
+						</div>
+					</div>
+					<% } else { %>
+					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
+							<br>
+						</div>
+					</div>
+					<% } %>
+					<% } else { %>
+					<div class="flag info" style="display: none;">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%= flag.description %>
+							<br>
+						</div>
+					</div>
+					<% } %>
+					<% }); %>
+					<% } %>
+					<% } else { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod couldn't be scanned.
+						</div>
+					</div>
+					<% } %>
+					<% } catch (error) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							An error occurred while scanning the mod: <%= error.message %>
+						</div>
+					</div>
+					<% } %>
+
 				</div>
 			</div>
 		</div>
@@ -384,19 +406,19 @@
 			</button>
 			<div class="content">
 				<% if (!jsonReport || !jsonReport.returnvalue) { %>
-					<% console.error(`Could not read file properties for id ${locals.appID}`); %>
-					<p>This scan does not contain file properties.</p>
+				<% console.error(`Could not read file properties for id ${locals.appID}`); %>
+				<p>This scan does not contain file properties.</p>
 				<% } else if (!jsonReport.returnvalue.regex || !jsonReport.returnvalue.regex.fileProperties) { %>
-					<% console.error(`Could not read file properties for id ${locals.appID}`); %>
-					<p>This scan does not contain file properties.</p>
+				<% console.error(`Could not read file properties for id ${locals.appID}`); %>
+				<p>This scan does not contain file properties.</p>
 				<% } else { %>
-					<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
-					<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
-					<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
-					<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
-					<p>
-						Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
-					</p>
+				<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
+				<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
+				<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
+				<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
+				<p>
+					Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
+				</p>
 				<% } %>
 			</div>
 		</div>
@@ -433,6 +455,29 @@
 		var height = (document.getElementById('footer').offsetHeight + 8) + "px"
 		/*body.style.marginBottom = height*/
 		body.style.minHeight = `calc(100vh - ${height} - 8px)`
+	</script>
+
+	<script>
+		if (localStorage.getItem('rs-additionalinfos') == 'true') {
+			displayAdditionalInfos(true)
+			document.getElementById('btn-addtinfo').innerHTML = 'Disable Additional Infos'
+		}
+
+		function toggleAdditionalInfos() {
+			var value = !(localStorage.getItem('rs-additionalinfos') == 'true')
+			localStorage.setItem('rs-additionalinfos', value)
+			document.getElementById('btn-addtinfo').innerHTML = `${value ? "Disable" : "Enable"} Additional Infos`
+			displayAdditionalInfos(value)
+		}
+
+		function displayAdditionalInfos(value) {
+			document.querySelectorAll('.flag.info').forEach(elem => {
+				if (value)
+					elem.style.display = ""
+				else
+					elem.style.display = "none"
+			})
+		}
 	</script>
 </body>
 
