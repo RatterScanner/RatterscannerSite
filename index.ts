@@ -1,8 +1,9 @@
 import express, { Express } from "express";
 import { randomBytes } from "node:crypto";
 import { createHash, createHmac } from "node:crypto";
-import { createChallenge, verifySolution } from 'altcha-lib';
+import { createChallenge } from "altcha-lib";
 import https from "node:https";
+import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
@@ -150,6 +151,7 @@ app.get("/report", (req: any, res: any) => {
 
         let completed = jsonData.state;
         let percentComplete;
+        
         try {
           percentComplete = jsonData.progress.regex.percentageCompleted;
           if (!(percentComplete > 0)) {
@@ -159,7 +161,34 @@ app.get("/report", (req: any, res: any) => {
         } catch {
           percentComplete = -1;
         }
-        let status = jsonData.progress.networkAnalysis.status;
+
+        let status;
+        try {
+          if (completed == "active") {
+            status = jsonData.progress.networkAnalysis.status;
+          } else {
+            status = jsonData.progress.networkAnalysis.status;
+          }
+        } catch {
+          // ------------- TESTING CODE DO NOT COMMIT ----------------
+          const filePath = 'data.json';
+
+          fs.stat(filePath, (err, stats) => {
+            if (err && err.code === 'ENOENT') {
+              // file does not exist, create it
+              fs.writeFile(filePath, JSON.stringify(jsonData), (err) => {
+                if (err) {
+                  console.error(`Error writing to file: ${err}`);
+                } else {
+                  console.log(`File created: ${filePath}`);
+                }
+              });
+            } else {
+              // file already exists, do nothing
+              console.log(`File already exists: ${filePath}`);
+            }
+          });
+        }
         
         res.render("report", {completed: completed, percentage: percentComplete, status: status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
@@ -186,7 +215,6 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
         hmacKey: hmacKey,
         expires: expiration
       };
-      console.log(JSON.stringify(captchaList))
 
       captchaIndex++;
 
@@ -270,57 +298,47 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
   formData.append("file", fileBuffer, {
     filename: req.file.originalname
   });
-  
-  console.log("Sending to ratterscanner")
-  
+
+  console.log("Sending to ratterscanner");
+
   const options = {
     method: "POST",
-    hostname: "api.ratterscanner.com",
-    path: "/jar_scanner",
-    headers: Object.assign({
-      "Host": "api.ratterscanner.com",
+    url: "https://api.ratterscanner.com/jar_scanner",
+    headers: {
       "api_key": key,
-    }, formData.getHeaders())
+      ...formData.getHeaders()
+    },
+    data: formData
   };
-  
-  let ID;
-  
-  const req2 = https.request(options, (res2) => {
-    let data = "";
-    console.log("Request sent")
-    res2.on("data", (chunk) => { 
-      console.log("Recived chunk: " + chunk)
-      data += chunk;
-    });
-  
-    res2.on("end", () => {
-      console.log("Upload complete");
-      const jsonData = JSON.parse(data); // parse the response
-      let fileSource
-  
-      if (jsonData.status == "File found in safe list, not scanning") { // The file has been manually marked as safe by a human
-        try {
-          if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
-            fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
-          } else {
-            fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
-          }
-          res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
-          return;
-        } catch {
-          fileSource = "None";
+
+  try {
+    const response = await axios(options);
+    const jsonData = response.data;
+    let fileSource;
+
+    if (jsonData.status == "File found in safe list, not scanning") { // The file has been manually marked as safe by a human
+      try {
+        if (Object.keys(jsonData.knownFileDetails.modrinthInfo).length > 0) {
+          fileSource = jsonData.knownFileDetails.modrinthInfo.repoUrl;
+        } else {
+          fileSource = jsonData.knownFileDetails.githubInfo.repoUrl;
         }
+        res.status(200).send({ message: "File is safe", fileName: jsonData.fileName, download: fileSource});
+        return;
+      } catch {
+        fileSource = "None";
       }
-      let downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
-      if (downloads == undefined) { // If the file has zero downloads or does not exist on modrinth 
-        downloads = -1
-      }
-      const ID = jsonData.id;
-      res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID, downloads: downloads});
-    });
-  });
-  
-  formData.pipe(req2);
+    }
+    let downloads = jsonData.knownFileDetails?.modrinthInfo.amountOfDownloads;
+    if (downloads == undefined) { // If the file has zero downloads or does not exist on modrinth 
+      downloads = -1
+    }
+    const ID = jsonData.id;
+    res.status(200).send({ message: "Jar file uploaded successfully ID is:", appID: ID, downloads: downloads});
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
 });
 
 app.get("/safe", function (req: any, res: any) {
