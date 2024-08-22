@@ -149,6 +149,7 @@
 						}
 
 						if (solution !== undefined) {
+							resultDiv.innerText = "Uploading file";
 							const authData = {
 								id: id,
 								solution: solution,
@@ -171,6 +172,7 @@
 								alert("Request timed out");
 								window.location.reload();
 								document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+								resultDiv.innerText = "";
 								submitted = false; // Reset submitted here
 							}, 60000);
 
@@ -189,6 +191,7 @@
 										alert(data.message);
 										resultDiv.innerText = "Validating";
 										document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+										resultDiv.innerText = "";
 									} else if (data.message.includes("File is safe")) {
 										const sendData = {
 											fileName: data.fileName,
@@ -224,10 +227,9 @@
 					} else {
 						resultDiv.innerText = 'Failed to get challenge';
 					}
-				} catch (error) {
+				} catch (error) {	
 					resultDiv.innerText = 'Error: ' + error.message;
 				}
-
 				// ----------------------------------------
 			} else if (textInput.value == "") {
 				alert("You must supply a file or an ID")
