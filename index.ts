@@ -169,6 +169,7 @@ app.get("/report", (req: any, res: any) => {
             status = jsonData.progress.networkAnalysis.status;
           } else if (completed == "waiting") {
             status = "Waiting for analysis";
+            position = jsonData.position;
           }
         } catch {
           console.error("Failed to get analysis status")
