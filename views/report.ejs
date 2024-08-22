@@ -224,21 +224,12 @@
 		</div>
 		<div class="center white">
 			<% if (locals.completed == "waiting") { %>
-<<<<<<< HEAD
 				Another file is in the que, please wait </br>
 				Your position in the que: <%= locals.quePosition || "Error getting que position please report this to a developer" %>			
 			<% } else{ %> 
 				Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
 				Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
 			<% } %> 
-=======
-			Another file is in the que, please wait </br>
-			Your position in the que: <% locals.position || "Error getting position, please report this to a developer" %>
-			<% } else { %>
-			Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
-			Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
-			<% } %>
->>>>>>> 8daac4e95228dd8336e5b37bef6a58f58f05afa2
 		</div>
 
 		<% } else { %>
