@@ -147,25 +147,40 @@
 
 		}
 
-		.noticeContainer {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			width: 100%;
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+
+			to {
+				opacity: 1;
+			}
+		}
+	</style>
+
+	<style>
+		body {
+			margin-top: 8px;
+		}
+
+		#footer {
+			position: relative;
 			text-align: center;
-			padding: 10px;
+			/*padding: 10px;*/
+			padding-bottom: 10px;
+			padding-top: 10px;
+			width: 100%;
+			bottom: 0px;
+			left: 0px;
 		}
 
-		.noticeContainer>div {
+		#footer>div {
 			display: inline-block;
-		}
-
-		.noticeContainer>div>* {
-			display: inline;
-		}
-
-		.mb-2 {
 			margin-bottom: 0.5rem;
+		}
+
+		#footer>div>* {
+			display: inline;
 		}
 
 		.text-gray-300 {
@@ -188,222 +203,222 @@
 		.text-sm {
 			font-size: 0.875rem;
 		}
-
-		@keyframes fadeIn {
-			from {
-				opacity: 0;
-			}
-
-			to {
-				opacity: 1;
-			}
-		}
 	</style>
 </head>
 
 <body>
+	<main id="root">
 
-	<% if (!(locals.completed)) { %>
-	<div class="center white">
-		<img src=<%=locals.gifName || "Loading" %> alt="loading"> <br>
+		<% if (!(locals.completed)) { %>
+		<div class="center white">
+			<img src=<%=locals.gifName || "Loading" %> alt="loading"> <br>
+			<script>
+				setTimeout(() => {
+					location.reload()
+				}, 5000);
+			</script>
+		</div>
+		<div class="center white">
+			Static analysis status: <%= locals.percentage || "File is in scan que please wait" %>% complete </br>
+			Dynamic analysis status: <%= locals.status || "File is in scan que please wait" %>
+		</div>
+
+		<% } else { %>
+		<button class="button dark-blue" style="color: #fff;" onclick="window.location.href = '/'">Go back</button>
+		<div class="center white">
+			<h2>Report for ID: <%= locals.appID %></h2>
+		</div>
+
+		<div class="category white">
+			<button type="button" class="collapsible">
+				<h3>Static analysis</h3>
+			</button>
+			<div class="content">
+				<div class="flags">
+					<% if (locals.downloads > 10000) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod was found on modrinth with 10K+ downloads, it is most likely safe.
+						</div>
+					</div>
+					<% } %>
+
+					<% if (!jsonReport.returnvalue.regex.flagsTriggered) { %>
+					<% console.error(`Could not read flags for id ${locals.appID}`); %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod couldn't be scanned.
+						</div>
+					</div>
+					<% } else if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							The mod was scanned and no suspicious code was detected automatically. However, this doesn't
+							mean that the mod is 100% safe.
+						</div>
+					</div>
+					<% } else { %>
+					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+					<% if (flag.level>= 1) { %>
+					<!--Repeating code >:( there is probbly a better way to do this-->
+					<% if (flag.level==5) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							Known malicious software identified as: <b><%= flag.description %></b>
+							<div style="color: red;">This file is malicious!</div>
+							<br>
+						</div>
+					</div>
+					<% } else { %>
+					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%= flag.description.replace(/`([^`]+)`/g, /*'<b>$1</b>'*/ '$1') %>
+							<br>
+						</div>
+					</div>
+					<% } %>
+					<% } %>
+					<% }); %>
+					<% } %>
+				</div>
+			</div>
+		</div>
+
+		<div class="category white">
+			<button type="button" class="collapsible">
+				<h3>Malicious connections</h3>
+			</button>
+			<div class="content">
+				<div class="flags">
+					<% try { %>
+					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							No malicious connections were made.
+						</div>
+					</div>
+					<% } else { %>
+					<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%= flag %>
+							<br>
+						</div>
+					</div>
+					<% }); %>
+					<% } %>
+					<% } catch { %>
+					<% console.error(`Could not read malicious connections for id ${locals.appID}`); %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod couldn't be scanned.
+						</div>
+					</div>
+					<% } %>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="category white">
+			<button type="button" class="collapsible">
+				<h3>Unknown connections</h3>
+			</button>
+			<div class="content">
+				<div class="flags">
+					<% try { %>
+					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							No unknown connections were made.
+						</div>
+					</div>
+					<% } else { %>
+					<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
+					<div class="flag warning">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%= flag %>
+							<br>
+						</div>
+					</div>
+					<% }); %>
+					<% } %>
+					<% } catch { %>
+					<% console.error(`Could not read unknown connections for id ${locals.appID}`); %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod couldn't be scanned.
+						</div>
+					</div>
+					<% } %>
+				</div>
+			</div>
+		</div>
+
+		<div class="category white">
+			<button type="button" class="collapsible">
+				<h3>File info</h3>
+			</button>
+			<div class="content">
+				<% if (!jsonReport.returnvalue.regex.fileProperties) { %>
+				<% console.error(`Could not read file properties for id ${locals.appID}`); %>
+				<p>This scan does not contain file properties.</p>
+				<% } else { %>
+				<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
+				<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
+				<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
+				<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
+				<p>
+					Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
+				</p>
+				<% } %>
+			</div>
+		</div>
+
+		<% } %>
+
 		<script>
-			setTimeout(() => {
-				location.reload()
-			}, 5000);
+			var collapsibles = document.getElementsByClassName("collapsible")
+
+			for (var i = 0; i < collapsibles.length; i++) {
+				collapsibles[i].addEventListener("click", function() {
+					this.classList.toggle("opened")
+					var content = this.nextElementSibling
+					if (content.style.display == "block") {
+						content.style.display = "none"
+					} else {
+						content.style.display = "block"
+					}
+				});
+			}
 		</script>
-	</div>
-	<div class="center white">
-		Static analysis status: <%= locals.percentage || "File is in scan que please wait" %>% complete </br>
-		Dynamic analysis status: <%= locals.status || "File is in scan que please wait" %>
-	</div>
 
-	<% } else { %>
-	<button class="button dark-blue" style="color: #fff;" onclick="window.location.href = '/'">Go back</button>
-	<div class="center white">
-		<h2>Report for ID: <%= locals.appID %></h2>
-	</div>
+	</main>
 
-	<div class="category white">
-		<button type="button" class="collapsible">
-			<h3>Static analysis</h3>
-		</button>
-		<div class="content">
-			<div class="flags">
-				<% if (locals.downloads > 10000) { %>
-				<div class="flag safe">
-					<div class="flag-color"></div>
-					<div class="container">
-						This mod was found on modrinth with 10K+ downloads, it is most likely safe.
-					</div>
-				</div>
-				<% } %>
-
-				<% if (!jsonReport.returnvalue.regex.flagsTriggered) { %>
-				<% console.error(`Could not read flags for id ${locals.appID}`); %>
-				<div class="flag critical">
-					<div class="flag-color"></div>
-					<div class="container">
-						This mod couldn't be scanned.
-					</div>
-				</div>
-				<% } else if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
-				<div class="flag safe">
-					<div class="flag-color"></div>
-					<div class="container">
-						The mod was scanned and no suspicious code was detected automatically. However, this doesn't
-						mean that the mod is 100% safe.
-					</div>
-				</div>
-				<% } else { %>
-				<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
-				<% if (flag.level>= 1) { %>
-				<!--Repeating code >:( there is probbly a better way to do this-->
-				<% if (flag.level==5) { %>
-				<div class="flag critical">
-					<div class="flag-color"></div>
-					<div class="container">
-						Known malicious software identified as: <b><%= flag.description %></b>
-						<div style="color: red;">This file is malicious!</div>
-						<br>
-					</div>
-				</div>
-				<% } else { %>
-				<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
-					<div class="flag-color"></div>
-					<div class="container">
-						<%= flag.description.replace(/`([^`]+)`/g, /*'<b>$1</b>'*/ '$1') %>
-						<br>
-					</div>
-				</div>
-				<% } %>
-				<% } %>
-				<% }); %>
-				<% } %>
-			</div>
-		</div>
-	</div>
-
-	<div class="category white">
-		<button type="button" class="collapsible">
-			<h3>Malicious connections</h3>
-		</button>
-		<div class="content">
-			<div class="flags">
-				<% try { %>
-				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
-				<div class="flag safe">
-					<div class="flag-color"></div>
-					<div class="container">
-						No malicious connections were made.
-					</div>
-				</div>
-				<% } else { %>
-				<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
-				<div class="flag critical">
-					<div class="flag-color"></div>
-					<div class="container">
-						<%= flag %>
-						<br>
-					</div>
-				</div>
-				<% }); %>
-				<% } %>
-				<% } catch { %>
-				<% console.error(`Could not read malicious connections for id ${locals.appID}`); %>
-				<div class="flag critical">
-					<div class="flag-color"></div>
-					<div class="container">
-						This mod couldn't be scanned.
-					</div>
-				</div>
-				<% } %>
-			</div>
-		</div>
-	</div>
-
-
-	<div class="category white">
-		<button type="button" class="collapsible">
-			<h3>Unknown connections</h3>
-		</button>
-		<div class="content">
-			<div class="flags">
-				<% try { %>
-				<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
-				<div class="flag safe">
-					<div class="flag-color"></div>
-					<div class="container">
-						No unknown connections were made.
-					</div>
-				</div>
-				<% } else { %>
-				<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
-				<div class="flag warning">
-					<div class="flag-color"></div>
-					<div class="container">
-						<%= flag %>
-						<br>
-					</div>
-				</div>
-				<% }); %>
-				<% } %>
-				<% } catch { %>
-				<% console.error(`Could not read unknown connections for id ${locals.appID}`); %>
-				<div class="flag critical">
-					<div class="flag-color"></div>
-					<div class="container">
-						This mod couldn't be scanned.
-					</div>
-				</div>
-				<% } %>
-			</div>
-		</div>
-	</div>
-
-	<div class="category white">
-		<button type="button" class="collapsible">
-			<h3>File info</h3>
-		</button>
-		<div class="content">
-			<% if (!jsonReport.returnvalue.regex.fileProperties) { %>
-			<% console.error(`Could not read file properties for id ${locals.appID}`); %>
-			<p>This scan does not contain file properties.</p>
-			<% } else { %>
-			<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
-			<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
-			<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
-			<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
-			<p>
-				Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
-			</p>
-			<% } %>
-		</div>
-	</div>
-
-	<% } %>
-
-	<script>
-		var collapsibles = document.getElementsByClassName("collapsible")
-
-		for (var i = 0; i < collapsibles.length; i++) {
-			collapsibles[i].addEventListener("click", function() {
-				this.classList.toggle("opened")
-				var content = this.nextElementSibling
-				if (content.style.display == "block") {
-					content.style.display = "none"
-				} else {
-					content.style.display = "block"
-				}
-			});
-		}
-	</script>
-	<div class="noticeContainer mx-auto">
-		<div class="mb-2">
+	<footer id="footer">
+		<div>
 			<a href="https://ratterscanner.com/terms" class="text-gray-300 hover:text-white mx-2">Terms and Conditions</a>
 			<span class="text-gray-500">|</span><a href="https://ratterscanner.com/privacy" class="text-gray-300 hover:text-white mx-2">Privacy Policy</a>
 		</div>
 		<p class="text-gray-500 text-sm">© 2024 RatterScanner. All rights reserved.</p>
-	</div>
+	</footer>
+	<script>
+		const body = document.getElementById('root')
+		var height = (document.getElementById('footer').offsetHeight + 8) + "px"
+		/*body.style.marginBottom = height*/
+		body.style.minHeight = `calc(100vh - ${height} - 8px)`
+	</script>
 </body>
 
 </html>
