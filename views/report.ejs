@@ -209,7 +209,7 @@
 <body>
 	<main id="root">
 
-		<% if (!(locals.completed)) { %>
+		<% if (!(locals.completed == "completed")) { %>
 		<div class="center white">
 			<img src=<%=locals.gifName || "Loading" %> alt="loading"> <br>
 			<script>
@@ -219,8 +219,13 @@
 			</script>
 		</div>
 		<div class="center white">
-			Static analysis status: <%= locals.percentage || "File is in scan que please wait" %>% complete </br>
-			Dynamic analysis status: <%= locals.status || "File is in scan que please wait" %>
+			<% if (locals.completed == "waiting") { %>
+				Another file is in the que, please wait </br>
+				Your position in the que: <% locals.position || "Error getting position, please report this to a developer" %>  			
+			<% } else{ %> 
+				Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
+				Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
+			<% } %> 
 		</div>
 
 		<% } else { %>
@@ -378,17 +383,20 @@
 				<h3>File info</h3>
 			</button>
 			<div class="content">
-				<% if (!jsonReport.returnvalue.regex.fileProperties) { %>
-				<% console.error(`Could not read file properties for id ${locals.appID}`); %>
-				<p>This scan does not contain file properties.</p>
+				<% if (!jsonReport || !jsonReport.returnvalue) { %>
+					<% console.error(`Could not read file properties for id ${locals.appID}`); %>
+					<p>This scan does not contain file properties.</p>
+				<% } else if (!jsonReport.returnvalue.regex || !jsonReport.returnvalue.regex.fileProperties) { %>
+					<% console.error(`Could not read file properties for id ${locals.appID}`); %>
+					<p>This scan does not contain file properties.</p>
 				<% } else { %>
-				<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
-				<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
-				<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
-				<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
-				<p>
-					Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
-				</p>
+					<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
+					<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
+					<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
+					<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
+					<p>
+						Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
+					</p>
 				<% } %>
 			</div>
 		</div>

@@ -163,34 +163,19 @@ app.get("/report", (req: any, res: any) => {
         }
 
         let status;
+        let position;
         try {
           if (completed == "active") {
             status = jsonData.progress.networkAnalysis.status;
-          } else {
-            status = jsonData.progress.networkAnalysis.status;
+          } else if (completed == "waiting") {
+            status = "Waiting for analysis";
           }
         } catch {
-          // ------------- TESTING CODE DO NOT COMMIT ----------------
-          const filePath = 'data.json';
-
-          fs.stat(filePath, (err, stats) => {
-            if (err && err.code === 'ENOENT') {
-              // file does not exist, create it
-              fs.writeFile(filePath, JSON.stringify(jsonData), (err) => {
-                if (err) {
-                  console.error(`Error writing to file: ${err}`);
-                } else {
-                  console.log(`File created: ${filePath}`);
-                }
-              });
-            } else {
-              // file already exists, do nothing
-              console.log(`File already exists: ${filePath}`);
-            }
-          });
-        }
-        
-        res.render("report", {completed: completed, percentage: percentComplete, status: status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
+          console.error("Failed to get analysis status")
+          res.status(500).send("Internal server error")
+          return;
+        }        
+        res.render("report", {completed: completed, percentage: percentComplete, status: status, position: position, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
 })
 
