@@ -243,48 +243,57 @@
 						</div>
 					</div>
 					<% } %>
-
-					<% if (!jsonReport.returnvalue.regex.flagsTriggered) { %>
-					<% console.error(`Could not read flags for id ${locals.appID}`); %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							This mod couldn't be scanned.
+					<% try { %>
+						<% if (!jsonReport.returnvalue.regex.flagsTriggered) { %>
+						<% console.error(`Could not read flags for id ${locals.appID}`); %>
+						<div class="flag critical">
+							<div class="flag-color"></div>
+							<div class="container">
+								This mod couldn't be scanned.
+							</div>
 						</div>
-					</div>
-					<% } else if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							The mod was scanned and no suspicious code was detected automatically. However, this doesn't
-							mean that the mod is 100% safe.
+						<% } else if (jsonReport.returnvalue.regex.flagsTriggered.length === 0) { %>
+						<div class="flag safe">
+							<div class="flag-color"></div>
+							<div class="container">
+								The mod was scanned and no suspicious code was detected automatically. However, this doesn't
+								mean that the mod is 100% safe.
+							</div>
 						</div>
-					</div>
-					<% } else { %>
-					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
-					<% if (flag.level>= 1) { %>
-					<!--Repeating code >:( there is probbly a better way to do this-->
-					<% if (flag.level==5) { %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							Known malicious software identified as: <b><%= flag.description %></b>
-							<!--<div style="color: red;">This file is malicious!</div>-->
-							<br>
+						<% } else { %>
+						<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+						<% if (flag.level>= 1) { %>
+						<!--Repeating code >:( there is probbly a better way to do this-->
+						<% if (flag.level==5) { %>
+						<div class="flag critical">
+							<div class="flag-color"></div>
+							<div class="container">
+								Known malicious software identified as: <b><%= flag.description %></b>
+								<!--<div style="color: red;">This file is malicious!</div>-->
+								<br>
+							</div>
 						</div>
-					</div>
-					<% } else { %>
-					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
-						<div class="flag-color"></div>
-						<div class="container">
-							<%= flag.description.replace(/`([^`]+)`/g, /*'<b>$1</b>'*/ '$1') %>
-							<br>
+						<% } else { %>
+						<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+							<div class="flag-color"></div>
+							<div class="container">
+								<%= flag.description.replace(/`([^`]+)`/g, /*'<b>$1</b>'*/ '$1') %>
+								<br>
+							</div>
 						</div>
-					</div>
-					<% } %>
-					<% } %>
-					<% }); %>
-					<% } %>
+						<% } %>
+						<% } %>
+						<% }); %>
+						<% } %>
+					<% } catch { %>
+						<div class="flag critical">
+							<div class="flag-color"></div>
+							<div class="container">
+								This mod couldn't be scanned.
+							</div>
+						</div>
+					<% } %> 
+						 
 				</div>
 			</div>
 		</div>
