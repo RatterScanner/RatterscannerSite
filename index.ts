@@ -82,7 +82,7 @@ const validateCaptcha = async (req: any) => {
 
     return isHuman;
   } catch (err: any) {
-    console.error(`Error in Google Siteverify API: ${err.message}`);
+    console.error(`Error in Siteverify API: ${err.message}`);
     return false;
   }
 };
@@ -176,7 +176,7 @@ app.get("/report", (req: any, res: any) => {
           res.status(500).send("Internal server error")
           return;
         }        
-        res.render("report", {completed: completed, percentage: percentComplete, status: status, position: position, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
+        res.render("report", {completed: completed, percentage: percentComplete, status: status, quePosition: position, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
     });
 })
 
