@@ -14,3 +14,5 @@ You can test the website directly from [here](https://scan.ratterscanner.com/).
 
 # Config
 All configuration is done in the config.json file.
+
+Test
