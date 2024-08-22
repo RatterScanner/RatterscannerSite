@@ -265,23 +265,23 @@
 					<% } else { %>
 					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
 					<% if (flag.level >= 1) { %>
-					<% if (flag.level == 5) { %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							Known malicious software identified as: <b><%= flag.description %></b>
-							<br>
+						<% if (flag.level == 5) { %>
+						<div class="flag critical">
+							<div class="flag-color"></div>
+							<div class="container">
+								Known malicious software identified as: <b><%= flag.description %></b>
+								<br>
+							</div>
 						</div>
-					</div>
-					<% } else { %>
-					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
-						<div class="flag-color"></div>
-						<div class="container">
-							<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
-							<br>
+						<% } else { %>
+						<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+							<div class="flag-color"></div>
+							<div class="container">
+								<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
+								<br>
+							</div>
 						</div>
-					</div>
-					<% } %>
+						<% } %>
 					<% } else { %>
 					<div class="flag info" style="display: none;">
 						<div class="flag-color"></div>
@@ -463,10 +463,11 @@
 
 		function displayAdditionalInfos(value) {
 			document.querySelectorAll('.flag.info').forEach(elem => {
-				if (value)
+				if (value) {
 					elem.style.display = ""
-				else
+				} else {
 					elem.style.display = "none"
+				}
 			})
 		}
 	</script>
