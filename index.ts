@@ -54,6 +54,8 @@ const upload = multer({
 const app: any = express();
 const hmacKey = randomBytes(16).toString("hex");
 let captchaList : any = {};
+const maxCaptcha = 2;
+let captchaIndex = 0; // keep track of the current index in the circular queue
 
 app.use(express.static("images"));
 app.set('view engine', "ejs");
@@ -116,7 +118,7 @@ app.get("/favicon.ico", (req: any, res: any) => {
 
 app.get("/report", (req: any, res: any) => {
     let appID = req.query.appID;
-    let downloadCount = req.query.downloads;
+    let downloadCount = req.query.downloads; // Taking downloads in the url is a bad idea because someone can easily manipulate it
     if (appID == undefined){
         res.status(404).render("404");
         return;
@@ -146,10 +148,7 @@ app.get("/report", (req: any, res: any) => {
             return;
         }
 
-        let completed = false;
-        if (jsonData.state == "completed"){
-            completed = true;
-        }
+        let completed = jsonData.state;
         let percentComplete;
         try {
           percentComplete = jsonData.progress.regex.percentageCompleted;
@@ -160,7 +159,6 @@ app.get("/report", (req: any, res: any) => {
         } catch {
           percentComplete = -1;
         }
-
         let status = jsonData.progress.networkAnalysis.status;
         
         res.render("report", {completed: completed, percentage: percentComplete, status: status, downloads: downloadCount, gifName: "fadingWord.gif", appID: appID, jsonReport: jsonData});
@@ -178,12 +176,19 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
         hmacKey: hmacKey,
         maxNumber: 250000
       }); // TODO: Increace the challenge complexity based on factors like load, number of requests etc
-  
+
+      if (Object.keys(captchaList).length >= maxCaptcha) { // Removes the oldest captcha if the que reaches the limit
+        delete captchaList[Object.keys(captchaList)[captchaIndex % maxCaptcha]];
+      }
+
       captchaList[captchaID] = {
         challenge: challenge,
         hmacKey: hmacKey,
         expires: expiration
-      }
+      };
+      console.log(JSON.stringify(captchaList))
+
+      captchaIndex++;
 
       res.status(401).send({WWW_Authenticate: {challenge}, ID: captchaID})
       return;
