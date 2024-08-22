@@ -18,7 +18,8 @@
 
 	<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
 
-	<style> /* Move this into a CSS file at some point, this is getting too big */
+	<style>
+		/* Move this into a CSS file at some point, this is getting too big */
 		body {
 			font-family: Arial, sans-serif;
 			background-color: #111827;
@@ -108,11 +109,11 @@
 			padding: 10px;
 		}
 
-		.noticeContainer > div {
+		.noticeContainer>div {
 			display: inline-block;
 		}
 
-		.noticeContainer > div > * {
+		.noticeContainer>div>* {
 			display: inline;
 		}
 
@@ -146,7 +147,7 @@
 		let submitted = false;
 
 		async function checkForm() {
-			if (submitted){
+			if (submitted) {
 				return; // The user has already pressed the submit button
 			}
 			let fileInput = document.getElementById("file");
@@ -160,117 +161,117 @@
 				// ----------------------------------------
 				const resultDiv = document.getElementById("status");
 				try {
-                const response = await fetch("/upload", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                });
+					const response = await fetch("/upload", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json"
+						},
+					});
 
-				resultDiv.innerText = "Validating";
-                if (response.status === 401) {
-					document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
+					resultDiv.innerText = "Validating";
+					if (response.status === 401) {
+						document.getElementById("loadingContainer").innerHTML = '<img src="mistLoding.gif" alt="">';
 
-					const challengeResponse = await response.json();
-					const challenge = challengeResponse.WWW_Authenticate.challenge;
-					const salt = challenge.salt;
-					const maxNumber = challenge.maxnumber;
-					const algorithm = challenge.algorithm;
-					const id = challengeResponse.ID;
+						const challengeResponse = await response.json();
+						const challenge = challengeResponse.WWW_Authenticate.challenge;
+						const salt = challenge.salt;
+						const maxNumber = challenge.maxnumber;
+						const algorithm = challenge.algorithm;
+						const id = challengeResponse.ID;
 
-					let solution;
-					for (let i = 0; i < maxNumber; i++) {
-						const concatenatedString = salt + i.toString();
-						const hash = CryptoJS.SHA256(concatenatedString);
-						const hashedString = hash.toString(CryptoJS.enc.Hex);
+						let solution;
+						for (let i = 0; i < maxNumber; i++) {
+							const concatenatedString = salt + i.toString();
+							const hash = CryptoJS.SHA256(concatenatedString);
+							const hashedString = hash.toString(CryptoJS.enc.Hex);
 
-						if (hashedString === challenge.challenge) {
-						solution = i;
-						break;
+							if (hashedString === challenge.challenge) {
+								solution = i;
+								break;
+							}
 						}
-					}
 
-					if (solution !== undefined) {
+						if (solution !== undefined) {
 							const authData = {
-							id: id,
-							solution: solution,
-							salt: salt,
-							challenge: challenge.challenge,
-						};
+								id: id,
+								solution: solution,
+								salt: salt,
+								challenge: challenge.challenge,
+							};
 
-						const authHeader = `Altcha ${btoa(JSON.stringify(authData))}`;
-                        const response = grecaptcha.getResponse();
-						const formData = new FormData();
-						formData.append("jarFile", fileInput.files[0]);
-						formData.append("g-recaptcha-response", response)
+							const authHeader = `Altcha ${btoa(JSON.stringify(authData))}`;
+							const response = grecaptcha.getResponse();
+							const formData = new FormData();
+							formData.append("jarFile", fileInput.files[0]);
+							formData.append("g-recaptcha-response", response)
 
-						const controller = new AbortController();
-						const signal = controller.signal;
+							const controller = new AbortController();
+							const signal = controller.signal;
 
-						// Set a timeout of 1 minute
-						const timeoutId = setTimeout(() => {
-							controller.abort();
-							alert("Request timed out");
-							window.location.reload();
-							document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
-							submitted = false; // Reset submitted here
-						}, 60000);
-
-						fetch("/upload", {
-							method: "POST",
-							headers: {
-                                "Authorization": authHeader,
-							},
-							body: formData,
-							signal
-						})
-						.then(response => response.json()) // parse the response body as JSON
-						.then(data => {
-							clearTimeout(timeoutId);
-							if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
-								alert(data.message);
-								resultDiv.innerText = "Validating";
+							// Set a timeout of 1 minute
+							const timeoutId = setTimeout(() => {
+								controller.abort();
+								alert("Request timed out");
+								window.location.reload();
 								document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
-							} else if(data.message.includes("File is safe")) {
-								const sendData = {
-									fileName: data.fileName,
-									fileDownload: data.download
-								};
-								const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-								window.location.href = `/safe${queryString}`;
-							} else if(data.message.includes("File is malicious")) {
-								const sendData = {
-									fileName: data.fileName,
-								};
-								const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-								window.location.href = `/malicious${queryString}`;
-							} else {
-								const appID = data.appID;
-								window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
-							}
-						})
-						.catch(error => {
-							if (error.name === 'AbortError') {
-								console.log('Request was aborted');
-							} else {
-								console.error(error);
-							}
-							submitted = false;
-						})
-						.finally(() => {
-							submitted = false;
-						});
-                    } else {
-                        resultDiv.innerText = "Failed to find solution";
-                    }
-                } else {
-                    resultDiv.innerText = 'Failed to get challenge';
-                }
-            } catch (error) {
-                resultDiv.innerText = 'Error: ' + error.message;
-            }
-				
-			// ----------------------------------------
+								submitted = false; // Reset submitted here
+							}, 60000);
+
+							fetch("/upload", {
+									method: "POST",
+									headers: {
+										"Authorization": authHeader,
+									},
+									body: formData,
+									signal
+								})
+								.then(response => response.json()) // parse the response body as JSON
+								.then(data => {
+									clearTimeout(timeoutId);
+									if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
+										alert(data.message);
+										resultDiv.innerText = "Validating";
+										document.getElementById("loadingContainer").innerHTML = '<img src="" alt="">';
+									} else if (data.message.includes("File is safe")) {
+										const sendData = {
+											fileName: data.fileName,
+											fileDownload: data.download
+										};
+										const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+										window.location.href = `/safe${queryString}`;
+									} else if (data.message.includes("File is malicious")) {
+										const sendData = {
+											fileName: data.fileName,
+										};
+										const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+										window.location.href = `/malicious${queryString}`;
+									} else {
+										const appID = data.appID;
+										window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
+									}
+								})
+								.catch(error => {
+									if (error.name === 'AbortError') {
+										console.log('Request was aborted');
+									} else {
+										console.error(error);
+									}
+									submitted = false;
+								})
+								.finally(() => {
+									submitted = false;
+								});
+						} else {
+							resultDiv.innerText = "Failed to find solution";
+						}
+					} else {
+						resultDiv.innerText = 'Failed to get challenge';
+					}
+				} catch (error) {
+					resultDiv.innerText = 'Error: ' + error.message;
+				}
+
+				// ----------------------------------------
 			} else if (textInput.value == "") {
 				alert("You must supply a file or an ID")
 				submitted = false;
@@ -284,33 +285,34 @@
 		}
 
 		async function sha256(message) {
-            const encoder = new TextEncoder();
-            const encodedMessage = encoder.encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', encodedMessage);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
+			const encoder = new TextEncoder();
+			const encodedMessage = encoder.encode(message);
+			const hashBuffer = await crypto.subtle.digest('SHA-256', encodedMessage);
+			const hashArray = Array.from(new Uint8Array(hashBuffer));
+			const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+			return hashHex;
+		}
 
-        async function hmacSha256(message, key) {
-            const encoder = new TextEncoder();
-            const encodedMessage = encoder.encode(message);
-            const encodedKey = encoder.encode(key);
+		async function hmacSha256(message, key) {
+			const encoder = new TextEncoder();
+			const encodedMessage = encoder.encode(message);
+			const encodedKey = encoder.encode(key);
 
-            const cryptoKey = await crypto.subtle.importKey(
-                "raw",
-                encodedKey,
-                { name: "HMAC", hash: "SHA-256" },
-                true,
-                ["sign"]
-            );
+			const cryptoKey = await crypto.subtle.importKey(
+				"raw",
+				encodedKey, {
+					name: "HMAC",
+					hash: "SHA-256"
+				},
+				true,
+				["sign"]
+			);
 
-            const hmacBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encodedMessage);
-            const hmacArray = Array.from(new Uint8Array(hmacBuffer));
-            const hmacHex = hmacArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-            return hmacHex;
-        }
-
+			const hmacBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encodedMessage);
+			const hmacArray = Array.from(new Uint8Array(hmacBuffer));
+			const hmacHex = hmacArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+			return hmacHex;
+		}
 	</script>
 </head>
 
@@ -325,7 +327,7 @@
 				<!--This needs to look a lot better, but works for now-->
 			</div>
 			<div class="white">
-				<div class="g-recaptcha" data-sitekey=<%= locals.siteKey %> ></div>
+				<div class="g-recaptcha" data-sitekey=<%= locals.siteKey %>></div>
 			</div>
 			<div class="input-group">
 				<label for="text" style="color: #fff;">Enter an ID:</label>
@@ -344,4 +346,5 @@
 		<p class="text-gray-500 text-sm">© 2024 RatterScanner. All rights reserved.</p>
 	</div>
 </body>
+
 </html>

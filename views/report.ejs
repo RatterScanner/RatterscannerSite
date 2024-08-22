@@ -199,11 +199,6 @@
 			}
 		}
 	</style>
-	<script>
-		function back() {
-			window.location.href = "/"
-		}
-	</script>
 </head>
 
 <body>
@@ -223,7 +218,7 @@
 	</div>
 
 	<% } else { %>
-	<button class="button dark-blue" style="color: #fff;" onclick="back()">Go back</button>
+	<button class="button dark-blue" style="color: #fff;" onclick="window.location.href = '/'">Go back</button>
 	<div class="center white">
 		<h2>Report for ID: <%= locals.appID %></h2>
 	</div>
@@ -276,7 +271,7 @@
 				<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
 					<div class="flag-color"></div>
 					<div class="container">
-						<%= flag.description %>
+						<%= flag.description.replace(/`([^`]+)`/g, /*'<b>$1</b>'*/ '$1') %>
 						<br>
 					</div>
 				</div>

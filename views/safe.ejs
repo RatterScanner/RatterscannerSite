@@ -99,11 +99,11 @@
 			padding: 10px;
 		}
 
-		.noticeContainer > div {
+		.noticeContainer>div {
 			display: inline-block;
 		}
 
-		.noticeContainer > div > * {
+		.noticeContainer>div>* {
 			display: inline;
 		}
 
@@ -133,29 +133,30 @@
 		}
 	</style>
 	<script>
-		function back(){
+		function back() {
 			window.location.href = "/"
 		}
-    </script>
+	</script>
 </head>
+
 <body>
 	<button class="button dark-blue" style="color: #fff;" onclick="back()">Go back</button>
-    <div class="center">
-        <div class="flag safe">
-            <div class="flag-color"></div>
-            <div class="container"> 
-                The file <%= locals.fileName  %> was manually confirmed to be safe, this file is not malicious.
-            </div>
-        </div>
-    </div>
-	<% if (!(locals.downloadLink == undefined || locals.downloadLink == "None")) { %>
-		<div class="center">
-			<div class="flag safe">
-				<div class="container">
-					<a href=<%= locals.downloadLink %>>Modrinth/Github link</a> 
-				</div>
+	<div class="center">
+		<div class="flag safe">
+			<div class="flag-color"></div>
+			<div class="container">
+				The file <%= locals.fileName  %> was manually confirmed to be safe, this file is not malicious.
 			</div>
 		</div>
+	</div>
+	<% if (!(locals.downloadLink == undefined || locals.downloadLink == "None")) { %>
+	<div class="center">
+		<div class="flag safe">
+			<div class="container">
+				<a href=<%= locals.downloadLink %>>Modrinth/Github link</a>
+			</div>
+		</div>
+	</div>
 	<% } %>
 	<div class="noticeContainer mx-auto">
 		<div class="mb-2">
@@ -165,4 +166,5 @@
 		<p class="text-gray-500 text-sm">© 2024 RatterScanner. All rights reserved.</p>
 	</div>
 </body>
+
 </html>
