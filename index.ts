@@ -187,6 +187,7 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
     let expiration = new Date(Date.now() + 2 * 60 * 1000); // 2 mins from now
     let captchaID = Math.random().toString(36).substring(2, 9);
     try {
+      console.log("Generating POW verification")
       const challenge = await createChallenge({ // Generate a new random challenge with a specified complexity
         hmacKey: hmacKey,
         maxNumber: 250000
@@ -207,7 +208,7 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
       res.status(401).send({WWW_Authenticate: {challenge}, ID: captchaID})
       return;
     } catch (error: any) {
-      res.status(500).send({error: 'Failed to create challenge'})
+      res.status(500).send({error: "Failed to create challenge"})
       console.error("Failed to create challenge: " + error.message)
       return;
     }
@@ -227,7 +228,8 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
     let captcha = captchaList[captchaID];
 
     if (!(captcha)) {
-      res.status(401).send({ message: "Invalid captcha" });
+      console.log("FILE REJECTED: POW captcha invalid")
+      res.status(401).send({ message: "Invalid POW captcha. IF this issue persists please report it to a developer" });
       return;
     }
   
@@ -237,7 +239,8 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
     const recomputedChallengeHex = recomputedChallenge.digest("hex");
   
     if (recomputedChallengeHex !== challenge) {
-      res.status(401).send({ message: "Invalid challenge solution" });
+      console.log("FILE REJECTED: Invalid POW solution")
+      res.status(401).send({ message: "Invalid POW challenge solution. If this issue persists please report it to a developer" });
       return;
     }
   
@@ -246,12 +249,14 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
     signature.update(challenge);
     const expectedSignatureHex = signature.digest("hex");
     if (captcha.challenge.signature !== expectedSignatureHex) {
+      console.log("FILE REJECTED: Invalid POW signature")
       res.status(401).send({ message: "Invalid signature" });
       return;
     }
   
     if (!(captcha.expires > currentTime)) {
-      res.status(401).send({ message: "expired challenge" });
+      console.log("FILE REJECTED: Expired POW challenge")
+      res.status(401).send({ message: "Expired challenge. Please refresh the page and try again" });
     }
 
    delete captchaList[captchaID];
@@ -262,21 +267,34 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
   }
   // ---------------------------
 
-  const fileBuffer = req.file.buffer;
-  console.log("Recieved file")
+  console.log("Validating captcha")
 
   // Validate captcha
   const captchaValid = await validateCaptcha(req);
   if (!captchaValid) {
+    console.log("FILE REJECTED: Invalid captcha")
     return res.status(400).send({ message: "Invalid captcha" });
   }
-
+  console.log("Validating file")
   if (!req.file) {
+    console.log("FILE REJECTED: Did not upload file")
     return res.status(400).send({ message: "No file uploaded" });
   }
+  console.log()
+
+  const fileBuffer = req.file.buffer; // Moved this here to prevent crashes if someone bypasses client side file checks - Sylus
+  console.log("Recieved file")
+
+  if (fileBuffer == undefined) {
+    console.error("File upload failed, fileBuffer is undefined")
+    return res.status(500).send({ message: "File upload failed, fileBuffer is null. If this error persists please report it to a developer" });
+  }
+
   const magicNumber = fileBuffer.toString('hex', 0, 4);
 
+
   if (magicNumber !== '504b0304') { // Check if a file is actually a jar file with magic bytes
+    console.log("FILE REJECTED: Invalid JAR file")
     return res.status(400).send({ message: "Invalid JAR file" });
   }
 
