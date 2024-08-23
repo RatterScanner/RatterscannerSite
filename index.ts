@@ -7,6 +7,7 @@ import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
+import { constrainedMemory } from "node:process";
 
 try {
   globalThis.crypto = require("node:crypto").webcrypto; // This is needed for older versions of nodeJS that do not have a global declaration of crypto
@@ -52,6 +53,13 @@ const upload = multer({
     fileSize: fileSizeLimit * 1024 * 1024,
   },
 });
+
+const logger = (req : any, res : any, next : any) => {
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  console.log(`[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`);
+  next();
+};
+
 const app: any = express();
 const hmacKey = randomBytes(16).toString("hex");
 let captchaList : any = {};
@@ -61,6 +69,7 @@ let captchaIndex = 0; // keep track of the current index in the circular queue
 app.use(express.static("images"));
 app.set('view engine', "ejs");
 app.use(express.json());
+app.use(logger);
 // --------------------------------------------------
 // Put all functions here
 
@@ -110,7 +119,7 @@ async function hmacSha256(message: any, key: any) {
 // Routes only beyond this point
 
 app.get("/", (req: any, res: any) => {
-    res.render("index", {siteKey: config.siteKey});
+  res.render("index", {siteKey: config.siteKey});
 })
 
 app.get("/favicon.ico", (req: any, res: any) => {
