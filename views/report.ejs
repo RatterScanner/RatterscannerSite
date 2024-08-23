@@ -224,12 +224,12 @@
 		</div>
 		<div class="center white">
 			<% if (locals.completed == "waiting") { %>
-				Another file is in the que, please wait </br>
-				Your position in the que: <%= locals.quePosition || "Error getting que position please report this to a developer" %>			
-			<% } else{ %> 
-				Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
-				Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
-			<% } %> 
+			Another file is in the que, please wait </br>
+			Your position in the que: <%= locals.quePosition || "Error getting que position please report this to a developer" %>
+			<% } else{ %>
+			Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
+			Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
+			<% } %>
 		</div>
 
 		<% } else { %>
@@ -238,6 +238,36 @@
 		<div class="center white">
 			<h2>Report for ID: <%= locals.appID %></h2>
 		</div>
+
+		<% 
+		var wObfuscation = false
+		jsonReport?.returnvalue?.regex?.flagsTriggered?.forEach(function(flag) {
+			if (flag.obfuscation)
+				wObfuscation = true
+		})
+
+		if (wObfuscation) { /*add any other warning to this condition*/%>
+		<div class="category white">
+			<button type="button" class="collapsible">
+				<h3>⚠️ Warnings</h3>
+			</button>
+			<div class="content">
+				<% if (wObfuscation) { %>
+				<div class="warning">
+					<p>The scanned file possibly contains obfuscated Java bytecode or other tricks which are used to conceal the code's functionality. This can indicate malicious behavior, but it is also often used in legitimate paid software to protect against code theft.</p>
+					<p><b>Generally speaking:</b></p>
+					<p>Obfuscation in free and or "opensource" mods indicate malicious intent, it is however not definitive proof of a file being malicious. Obfuscation is generally speaking okay for paid software as it protects the mods source from cracking and theft. A non paid mod containing obfuscation is very suspicious.</p>
+					<p><b>What does obfuscation do?</b></p>
+					<p>Obfuscation causes code to be mangled and harder to read, which in turn makes it harder to scan. Obfuscation aims to not have any affect on the end result of the code but only the readibility of the code (See the image below).</p>
+					<p>Obfuscation can have a large impact on the results shown by most static analyis scanners, which is why it is important to <b>be catious around obfuscated code</b>.</p>
+					<p><i>Note: Ratter Scanner's obfuscation flags may trigger on non obfuscated code. Obfuscation detection is challenging, and flags are intentionally kept sensitive. Manual analysis may be needed to confirm safety in an obfuscated file.</i></p>
+					<h5><code>The image below shows an example of obfuscation in JavaScript.</code></h5>
+					<img src="https://cdn.ratterscanner.com/raw/obfuscated.png" alt="Example of obfuscation">
+				</div>
+				<% } %>
+			</div>
+		</div>
+		<% } %>
 
 		<div class="category white">
 			<button type="button" class="collapsible">
@@ -265,23 +295,23 @@
 					<% } else { %>
 					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
 					<% if (flag.level >= 1) { %>
-						<% if (flag.level == 5) { %>
-						<div class="flag critical">
-							<div class="flag-color"></div>
-							<div class="container">
-								Known malicious software identified as: <b><%= flag.description %></b>
-								<br>
-							</div>
+					<% if (flag.level == 5) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							Known malicious software identified as: <b><%= flag.description %></b>
+							<br>
 						</div>
-						<% } else { %>
-						<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
-							<div class="flag-color"></div>
-							<div class="container">
-								<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
-								<br>
-							</div>
+					</div>
+					<% } else { %>
+					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+						<div class="flag-color"></div>
+						<div class="container">
+							<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
+							<br>
 						</div>
-						<% } %>
+					</div>
+					<% } %>
 					<% } else { %>
 					<div class="flag info" style="display: none;">
 						<div class="flag-color"></div>

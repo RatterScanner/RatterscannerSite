@@ -377,4 +377,4 @@ app.use(function (req: any, res: any) {
 });
 
 app.listen(config.port);
-console.log("Listening")
+console.log(`Listening to port ${config.port}`)
