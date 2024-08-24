@@ -14,3 +14,7 @@ You can test the website directly from [here](https://scan.ratterscanner.com/).
 
 # Config
 All configuration is done in the config.json file.
+
+## Contributing
+You are able to selfhost parts of the website. Some parts such as file uploading wont work on a selfhosted instance out of the box. We might make an easy testing process for this in the future.
+Feel free to suggest new features or improvements via github issues! Please assign issues that require modifications to the backend to @eGirlQuint
