@@ -302,11 +302,27 @@
 									</div>
 							</div>
 							<% } %>
-							<% let hasCriticalOrWarnFlag = false; %>
-							<% let hasInfoFlag = false; %>
+	
+							<% let flags = []; %>
 							<% try { %>
 							<% if (jsonReport && jsonReport.returnvalue && jsonReport.returnvalue.regex && jsonReport.returnvalue.regex.flagsTriggered) { %>
 									<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+											<% flags.push(flag); %>
+									<% }); %>
+	
+									<% // Sort flags by severity level first (descending), then alphabetically by description
+									flags.sort((a, b) => {
+											if (b.level !== a.level) {
+													return b.level - a.level; // Sort by level descending
+											}
+											return a.description.localeCompare(b.description); // Sort alphabetically
+									}); %>
+	
+									<% let hasCriticalOrWarnFlag = false; %>
+									<% let hasInfoFlag = false; %>
+	
+									<% // Render sorted flags
+									flags.forEach(function(flag) { %>
 											<% if (flag.level >= 1) { %>
 													<% hasCriticalOrWarnFlag = true; %>
 													<% if (flag.level == 5) { %>
@@ -351,7 +367,7 @@
 											<div class="flag safe">
 													<div class="flag-color"></div>
 													<div class="container">
-															The mod was scanned and no suspicious code was found. Only informational flags are present, you can view these by clicking the "Enabled Additional Info" button.
+															The mod was scanned and no significant issues were found. Only informational flags are present.
 													</div>
 											</div>
 											<script>
