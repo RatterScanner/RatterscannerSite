@@ -250,8 +250,8 @@
 		<% 
 		var wObfuscation = false
 		jsonReport?.returnvalue?.regex?.flagsTriggered?.forEach(function(flag) {
-			if (flag.obfuscation)
-			wObfuscation = true
+			if (flag.obfuscation && flag.level > 0)
+				wObfuscation = true
 		})
 		
 		var wNetworkBehaviour = false
