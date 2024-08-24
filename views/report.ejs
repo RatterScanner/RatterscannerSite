@@ -280,7 +280,7 @@
 				if (wNetworkBehaviour) { %>
 				<div class="warning">
 					<% jsonReport.returnvalue.networkAnalysis.generalResults.behaviour.forEach(behaviour => { %>
-						<p><%= behaviour %></p>
+					<p><%= behaviour %></p>
 					<% }) %>
 				</div>
 				<% } %>
@@ -290,109 +290,106 @@
 
 		<div class="category white">
 			<button type="button" class="collapsible">
-					<h3>Static analysis</h3>
+				<h3>Static analysis</h3>
 			</button>
 			<div class="content">
-					<div class="flags">
-							<% if (locals.downloads > 10000) { %>
-							<div class="flag safe">
-									<div class="flag-color"></div>
-									<div class="container">
-											This mod was found on modrinth with 10K+ downloads, it is most likely safe.
-									</div>
-							</div>
-							<% } %>
-	
-							<% let flags = []; %>
-							<% try { %>
-							<% if (jsonReport && jsonReport.returnvalue && jsonReport.returnvalue.regex && jsonReport.returnvalue.regex.flagsTriggered) { %>
-									<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
-											<% flags.push(flag); %>
-									<% }); %>
-	
-									<% // Sort flags by severity level first (descending), then alphabetically by description
+				<div class="flags">
+					<% if (locals.downloads > 10000) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod was found on modrinth with 10K+ downloads, it is most likely safe.
+						</div>
+					</div>
+					<% } %>
+
+					<% let flags = []; %>
+					<% try { %>
+					<% if (jsonReport && jsonReport.returnvalue && jsonReport.returnvalue.regex && jsonReport.returnvalue.regex.flagsTriggered) { %>
+					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
+					<% flags.push(flag); %>
+					<% }); %>
+
+					<% // Sort flags by severity level first (descending), then alphabetically by description
 									flags.sort((a, b) => {
 											if (b.level !== a.level) {
 													return b.level - a.level; // Sort by level descending
 											}
 											return a.description.localeCompare(b.description); // Sort alphabetically
 									}); %>
-	
-									<% let hasCriticalOrWarnFlag = false; %>
-									<% let hasInfoFlag = false; %>
-	
-									<% // Render sorted flags
+
+					<% let hasCriticalOrWarnFlag = false; %>
+					<% let hasInfoFlag = false; %>
+
+					<% // Render sorted flags
 									flags.forEach(function(flag) { %>
-											<% if (flag.level >= 1) { %>
-													<% hasCriticalOrWarnFlag = true; %>
-													<% if (flag.level == 5) { %>
-															<div class="flag critical">
-																	<div class="flag-color"></div>
-																	<div class="container">
-																			Known malicious software identified as: <b><%= flag.description %></b>
-																			<br>
-																	</div>
-															</div>
-													<% } else { %>
-															<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warn<% } %>">
-																	<div class="flag-color"></div>
-																	<div class="container">
-																			<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
-																			<br>
-																	</div>
-															</div>
-													<% } %>
-											<% } else { %>
-													<% hasInfoFlag = true; %>
-													<div class="flag info" style="display: none;">
-															<div class="flag-color"></div>
-															<div class="container">
-																	<%= flag.description %>
-																	<br>
-															</div>
-													</div>
-											<% } %>
-									<% }); %>
-	
-									<% if (!hasCriticalOrWarnFlag && !hasInfoFlag) { %>
-											<div class="flag safe">
-													<div class="flag-color"></div>
-													<div class="container">
-															The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
-													</div>
-											</div>
-									<% } %>
-	
-									<% if (!hasCriticalOrWarnFlag && hasInfoFlag) { %>
-											<div class="flag safe">
-													<div class="flag-color"></div>
-													<div class="container">
-															The mod was scanned and no significant issues were found. Only informational flags are present.
-													</div>
-											</div>
-											<script>
-													displayAdditionalInfos(false);
-											</script>
-									<% } %>
-							<% } else { %>
-									<div class="flag critical">
-											<div class="flag-color"></div>
-											<div class="container">
-													This mod couldn't be scanned.
-											</div>
-									</div>
-							<% } %>
-							<% } catch (error) { %>
-							<div class="flag critical">
-									<div class="flag-color"></div>
-									<div class="container">
-											An error occurred while scanning the mod: <%= error.message %>
-									</div>
-							</div>
-							<% } %>
+					<% if (flag.level >= 1) { %>
+					<% hasCriticalOrWarnFlag = true; %>
+					<% if (flag.level == 5) { %>
+					<div class="flag critical">
+						<div class="flag-color" title="Level 5"></div>
+						<div class="container">
+							Known malicious software identified as: <b><%= flag.description %></b>
+							<br>
+						</div>
 					</div>
+					<% } else { %>
+					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warn<% } %>">
+						<div class="flag-color" title="Level <%= flag.level %>"></div>
+						<div class="container">
+							<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
+							<br>
+						</div>
+					</div>
+					<% } %>
+					<% } else { %>
+					<% hasInfoFlag = true; %>
+					<div class="flag info" style="display: none;">
+						<div class="flag-color" title="Level 0"></div>
+						<div class="container">
+							<%= flag.description %>
+							<br>
+						</div>
+					</div>
+					<% } %>
+					<% }); %>
+
+					<% if (!hasCriticalOrWarnFlag && !hasInfoFlag) { %>
+					<div class="flag safe">
+						<div class="flag-color"></div>
+						<div class="container">
+							The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
+						</div>
+					</div>
+					<% } %>
+
+					<% if (!hasCriticalOrWarnFlag && hasInfoFlag) { %>
+					<div class="flag safe" id="infoflag">
+						<div class="flag-color"></div>
+						<div class="container">
+							The mod was scanned and no significant issues were found. Only informational flags are present.
+						</div>
+					</div>
+					<% } %>
+					<% } else { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							This mod couldn't be scanned.
+						</div>
+					</div>
+					<% } %>
+					<% } catch (error) { %>
+					<div class="flag critical">
+						<div class="flag-color"></div>
+						<div class="container">
+							An error occurred while scanning the mod: <%= error.message %>
+						</div>
+					</div>
+					<% } %>
+				</div>
 			</div>
-	</div>
+		</div>
 
 		<div class="category white">
 			<button type="button" class="collapsible">
@@ -522,10 +519,9 @@
 		<p class="text-gray-500 text-sm">© 2024 RatterScanner. All rights reserved.</p>
 	</footer>
 	<script>
-		const body = document.getElementById('root')
+		const root = document.getElementById('root')
 		var height = (document.getElementById('footer').offsetHeight + 8) + "px"
-		/*body.style.marginBottom = height*/
-		body.style.minHeight = `calc(100vh - ${height} - 8px)`
+		root.style.minHeight = `calc(100vh - ${height} - 8px)`
 	</script>
 
 	<script>
@@ -543,12 +539,11 @@
 
 		function displayAdditionalInfos(value) {
 			document.querySelectorAll('.flag.info').forEach(elem => {
-				if (value) {
-					elem.style.display = ""
-				} else {
-					elem.style.display = "none"
-				}
+				elem.style.display = value ? "" : "none"
 			})
+			var infoflag = document.getElementById('infoflag')
+			if(infoflag != null)
+				infoflag.style.display = value ? "none" : ""
 		}
 	</script>
 </body>
