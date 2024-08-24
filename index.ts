@@ -96,7 +96,9 @@ const validateCaptcha = async (req: any) => {
   }
 };
 
-async function hmacSha256(message: any, key: any) {
+// Commented out below function because it does not seem to be used by anything. Correct @sylus-squared?
+
+/*async function hmacSha256(message: any, key: any) {
   const encoder = new TextEncoder();
   const encodedMessage = encoder.encode(message);
   const encodedKey = encoder.encode(key);
@@ -113,7 +115,7 @@ async function hmacSha256(message: any, key: any) {
   const signatureArray = Array.from(new Uint8Array(signatureBuffer));
   const signatureHex = signatureArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
   return signatureHex;
-}
+}*/
 
 // --------------------------------------------------
 // Routes only beyond this point
@@ -143,8 +145,13 @@ app.get("/report", (req: any, res: any) => {
                 data += chunk;
             });
             res.on('end', () => {
+              try {
                 let jsonData = JSON.parse(data);
                 callback(jsonData);
+              } catch (err){
+                console.log(err)
+                callback(null)
+              }
             });
         }).on('error', (err) => {
             console.error(err);
