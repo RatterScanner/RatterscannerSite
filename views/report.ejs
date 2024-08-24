@@ -16,6 +16,16 @@
 	<meta property="og:color" content="#ff7878">
 
 	<style>
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+
+			to {
+				opacity: 1;
+			}
+		}
+
 		body {
 			font-family: Arial, sans-serif;
 			background-color: #111827;
@@ -80,7 +90,7 @@
 			background-color: red;
 		}
 
-		.warning .flag-color {
+		.warn .flag-color {
 			background-color: rgb(212, 212, 7);
 		}
 
@@ -110,7 +120,7 @@
 			margin-left: 5px;
 
 			.collapsible {
-				background-color: #ffffff12;
+				background-color: #ffffff18;
 				color: #fff;
 				width: 300px;
 				cursor: pointer;
@@ -126,7 +136,7 @@
 
 			.collapsible.opened,
 			.collapsible:hover {
-				background-color: #ffffff18;
+				background-color: #ffffff20;
 			}
 
 			.collapsible:after {
@@ -151,14 +161,12 @@
 
 		}
 
-		@keyframes fadeIn {
-			from {
-				opacity: 0;
-			}
-
-			to {
-				opacity: 1;
-			}
+		.warning {
+			padding: 8px;
+			padding-left: 15px;
+			margin: 10px 15px 10px 5px;
+			background-color: #ffffff12;
+			border-radius: 10px;
 		}
 	</style>
 
@@ -243,10 +251,14 @@
 		var wObfuscation = false
 		jsonReport?.returnvalue?.regex?.flagsTriggered?.forEach(function(flag) {
 			if (flag.obfuscation)
-				wObfuscation = true
+			wObfuscation = true
 		})
+		
+		var wNetworkBehaviour = false
+		if(jsonReport?.returnvalue?.networkAnalysis?.generalResults?.behaviour?.length > 0)
+			wNetworkBehaviour = true
 
-		if (wObfuscation) { /*add any other warning to this condition*/%>
+		if (wObfuscation || wNetworkBehaviour) { /*add any other warning to this condition*/%>
 		<div class="category white">
 			<button type="button" class="collapsible">
 				<h3>⚠️ Warnings</h3>
@@ -263,6 +275,13 @@
 					<p><i>Note: Ratter Scanner's obfuscation flags may trigger on non obfuscated code. Obfuscation detection is challenging, and flags are intentionally kept sensitive. Manual analysis may be needed to confirm safety in an obfuscated file.</i></p>
 					<h5><code>The image below shows an example of obfuscation in JavaScript.</code></h5>
 					<img src="https://cdn.ratterscanner.com/raw/obfuscated.png" alt="Example of obfuscation">
+				</div>
+				<% } 
+				if (wNetworkBehaviour) { %>
+				<div class="warning">
+					<% jsonReport.returnvalue.networkAnalysis.generalResults.behaviour.forEach(behaviour => { %>
+						<p><%= behaviour %></p>
+					<% }) %>
 				</div>
 				<% } %>
 			</div>
@@ -304,7 +323,7 @@
 						</div>
 					</div>
 					<% } else { %>
-					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warning<% } %>">
+					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warn<% } %>">
 						<div class="flag-color"></div>
 						<div class="container">
 							<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
@@ -399,7 +418,7 @@
 					</div>
 					<% } else { %>
 					<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
-					<div class="flag warning">
+					<div class="flag warn">
 						<div class="flag-color"></div>
 						<div class="container">
 							<%= flag %>
