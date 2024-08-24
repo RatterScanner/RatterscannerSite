@@ -164,11 +164,11 @@ app.get("/report", (req: any, res: any) => {
         try {
           percentComplete = jsonData.progress.regex.percentageCompleted;
           if (!(percentComplete > 0)) {
-            percentComplete = -1
+            percentComplete = 1
           }
 
         } catch {
-          percentComplete = -1;
+          percentComplete = 1;
         }
 
         let status;
