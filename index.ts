@@ -131,7 +131,7 @@ app.get("/favicon.ico", (req: any, res: any) => {
 app.get("/report", (req: any, res: any) => {
     let appID = req.query.appID;
     let downloadCount = req.query.downloads; // Taking downloads in the url is a bad idea because someone can easily manipulate it
-    if (appID == undefined){
+    if (appID == "undefined"){
         res.status(404).render("404");
         return;
     }
