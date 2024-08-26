@@ -56,7 +56,7 @@ const upload = multer({
 
 const logger = (req : any, res : any, next : any) => {
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  console.log(`[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`);
+ // console.log(`[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`);
   next();
 };
 
@@ -67,6 +67,8 @@ const maxCaptcha = 2;
 let captchaIndex = 0; // keep track of the current index in the circular queue
 
 app.use(express.static("images"));
+app.use(express.static("styles"));
+app.use(express.static("scripts"));
 app.set('view engine', "ejs");
 app.use(express.json());
 app.use(logger);
@@ -96,32 +98,11 @@ const validateCaptcha = async (req: any) => {
   }
 };
 
-// Commented out below function because it does not seem to be used by anything. Correct @sylus-squared?
-
-/*async function hmacSha256(message: any, key: any) {
-  const encoder = new TextEncoder();
-  const encodedMessage = encoder.encode(message);
-  const encodedKey = encoder.encode(key);
-
-  const hmac = await crypto.subtle.importKey(
-    "raw",
-    encodedKey,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-
-  const signatureBuffer = await crypto.subtle.sign("HMAC", hmac, encodedMessage);
-  const signatureArray = Array.from(new Uint8Array(signatureBuffer));
-  const signatureHex = signatureArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
-  return signatureHex;
-}*/
-
 // --------------------------------------------------
 // Routes only beyond this point
 
 app.get("/", (req: any, res: any) => {
-  res.render("index", {siteKey: config.siteKey});
+  res.render("index", {fileLimit: fileSizeLimit, siteKey: config.siteKey});
 })
 
 app.get("/favicon.ico", (req: any, res: any) => {
@@ -362,8 +343,7 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
 });
 
 app.get("/safe", function (req: any, res: any) {
-  const data = JSON.parse(req.query.data);
-  
+  const data = JSON.parse(req.query.data);  
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
 });
 

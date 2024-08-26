@@ -1,0 +1,231 @@
+body {
+  background-color: #111827;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.box {
+  background-color: #1f2937;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 400px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  background-color: #1f2937;
+  padding: 10px;
+  border-bottom: 1px solid #636161;
+}
+
+.tab {
+  background-color: #1f2937;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #fff;
+}
+
+.tab:hover {
+  background-color: #616161;
+}
+
+.tab.active {
+  background-color: #111827;
+  font-weight: bold;
+}
+
+.box-content {
+  padding: 20px;
+}
+
+.tab-text {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #636161;
+  margin-bottom: 20px;
+  background-color: #1f2937;
+}
+
+.file-upload img {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
+}
+
+.file-upload input[type="file"] {
+  display: none;
+}
+
+.file-upload label {
+  cursor: pointer;
+  padding: 10px 20px;
+  border: none;
+  background-color: #1f2937;
+  font-size: 16px;
+  color: #fff;
+}
+
+.or-text {
+  font-size: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #fff;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.input-box input[type="text"] {
+  padding: 10px;
+  border: 1px solid #636161;
+  width: 200px;
+  background-color: #1f2937;
+  color: #fff;
+  height: 23px;
+}
+
+.input-box button[type="button"] {
+  padding: 10px 20px;
+  border: none;
+  background-color: #4CAF50;
+  color: #fff;
+  cursor: pointer;
+  height: 40px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 1px solid #3e8e41;
+}
+
+.input-box button[type="button"]:hover {
+  background-color: #3e8e41;
+}
+
+.button-5 {
+  align-items: center;
+  background-clip: padding-box;
+  background-color: #0b5697;
+  border: 1px solid transparent;
+  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  justify-content: center;
+  line-height: 1.25;
+  margin: 0;
+  min-height: 3rem;
+  padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+  position: relative;
+  text-decoration: none;
+  transition: all 250ms;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  width: auto;
+  height: 40px;
+}
+
+.button-5:hover,
+.button-5:focus {
+  background-color: #0a4c73;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+}
+
+.button-5:hover {
+  transform: translateY(-1px);
+}
+
+.button-5:active {
+  background-color: #083a5e;
+  box-shadow: rgba(0, 0, 0, .06) 0 2px 4px;
+  transform: translateY(0);
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #111827;
+  padding: 10px;
+  text-align: center;
+  color: #fff;
+  z-index: 1;
+}
+
+.file-upload label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  cursor: pointer;
+}
+.file-upload input[type="file"] {
+  display: none;
+}
+
+.popup-box {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  position: relative;
+  background-color: #1f2937;
+  color: #ffffff;
+  padding: 20px;
+  width: 300px;
+  margin: 40px auto;
+}
+
+.close-popup {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.close-popup:hover {
+  color: #929292;
+}
+
