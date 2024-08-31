@@ -7,12 +7,12 @@ import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";
 import fs from "fs";
-import { constrainedMemory } from "node:process";
+import path from "path";
 
 try {
   globalThis.crypto = require("node:crypto").webcrypto; // This is needed for older versions of nodeJS that do not have a global declaration of crypto
 } catch {
-
+  // Do nothing, nodeJS already has a global declaration
 }
 
 interface Config {
@@ -54,9 +54,22 @@ const upload = multer({
   },
 });
 
-const logger = (req : any, res : any, next : any) => {
+const logDir = "logs"; // Might make a config ffor this, but is it needed?
+const logFilePrefix = "access_logs";
+
+const logger = (req: any, res: any, next: any) => { // Log all requests to a file
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
- // console.log(`[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`);
+  const logMessage = `[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`;
+  
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
+  }
+  
+  const date = new Date();
+  const logFileName = `${date.toISOString().split('T')[0]}_${logFilePrefix}.log`;
+  const logFilePath = path.join(logDir, logFileName);
+  
+  fs.appendFileSync(logFilePath, logMessage + '\n');  
   next();
 };
 
