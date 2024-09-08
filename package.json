@@ -4,7 +4,8 @@
   "main": "index.ts",
   "scripts": {
     "start": "npx tsc && node dist/index.js",
-    "devStart": "nodemon index.ts"
+    "devStart": "nodemon index.ts",
+    "test": "npx tsc &&  node dist/index.js -test"
   },
   "keywords": [],
   "author": "",

@@ -25,16 +25,20 @@ interface Config {
   port: number;
 }
 
-let config: Config | undefined;
+let config: any | undefined;
 
-try {
-  if (!(process.argv.includes("-test"))) {
+let key;
+if (!(process.argv[2] === "-test")) { // Prevents the test from crashing as there is no config.js file
+  try {
     const data = fs.readFileSync("config.json", "utf8");
     config = JSON.parse(data);
+  } catch (error) {
+    console.error("Error reading config file:", error);
+    throw new Error("Program Terminated");
   }
-} catch (error) {
-  console.error("Error reading config file:", error);
-  throw new Error("Program Terminated");
+} else {
+  console.log("-test flag detected")
+  config = {apiKey: "testKey", fileSizeLimit: 500, port: 3000}
 }
 
 if (!config) {
@@ -42,8 +46,7 @@ if (!config) {
   throw new Error("Program Terminated");
 }
 
-const key = config.apiKey;
-
+key = config.apiKey;
 if (!key || key === "" || key === "<apikeyGoHere>") {
   console.error("Key is null because of this the program cannot continue");
   throw new Error("Program Terminated");
@@ -430,4 +433,4 @@ app.use(function (req: any, res: any) {
 });
 
 app.listen(config.port);
-console.log(`Listening to port ${config.port}`)
+console.log(`Listening on port ${config.port}`)
