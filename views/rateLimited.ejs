@@ -1,0 +1,25 @@
+<head>
+    <title>Rate limit reached</title>
+    <style>
+        .rate-limit-box {
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .rate-limit-text {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="box-content">
+          <h2 class="tab-text">Rate Limit Reached</h2>
+          <p class="or-text">You have exceeded the maximum number of requests allowed within a certain time period. Please try again later.</p>
+          <button class="button-5" onclick="window.location.href = '/'">Try Again</button>
+          <p>Aditional info: <%= locals.reason || "Not provided" %> </p>
+        </div>
+    </div>
+</body>

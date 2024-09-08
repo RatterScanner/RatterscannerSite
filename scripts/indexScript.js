@@ -33,14 +33,15 @@ document.querySelector(".close-popup").addEventListener("click", function() {
 });
 
 async function submitFile() {
-  submitButton.innerHTML = '<img src="upload.gif" alt="Submit">';
-  console.log("Submitted file")
-
   if (submitted) {
     return; // The user has already pressed the submit button
   }
+  submitButton.innerHTML = 'Validating';
+  console.log("Submitted file")
+
   submitted = true;
   let authData = await getChallenge();
+  submitButton.innerHTML = '<img src="upload.gif" alt="Submit">';
   sendFile(authData, file)
 };
 
@@ -63,34 +64,39 @@ async function sendFile(auth, file) {
   }, 60000);
 
   fetch("/upload", {
-      method: "POST",
-      headers: {
-        "Authorization": authHeader,
-      },
-      body: formData,
-      signal
+    method: "POST",
+    headers: {
+      "Authorization": authHeader,
+    },
+    body: formData,
+    signal
   })
-  .then(response => response.json()) // parse the response body as JSON
-  .then(data => {
+  .then(response => response.text()) // Get the response as text (HTML)
+  .then(html => {
     clearTimeout(timeoutId);
-    if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
-      alert(data.message);
-    } else if (data.message.includes("File is safe")) {
-      const sendData = {
-        fileName: data.fileName,
-        fileDownload: data.download
-      };
-      const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-      window.location.href = `/safe${queryString}`;
-    } else if (data.message.includes("File is malicious")) {
-      const sendData = {
-        fileName: data.fileName,
-    };
-      const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-      window.location.href = `/malicious${queryString}`;
+    if (html.includes("rateLimited")) { // Check if the response is the rateLimited page
+      document.body.innerHTML = html;
     } else {
-      const appID = data.appID;
-      window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
+      const data = JSON.parse(html);
+      if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
+        alert(data.message);
+      } else if (data.message.includes("File is safe")) {
+        const sendData = {
+          fileName: data.fileName,
+          fileDownload: data.download
+        };
+        const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+        window.location.href = `/safe${queryString}`;
+      } else if (data.message.includes("File is malicious")) {
+        const sendData = {
+          fileName: data.fileName,
+        };
+        const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+        window.location.href = `/malicious${queryString}`;
+      } else {
+        const appID = data.appID;
+        window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
+      }
     }
   })
   .catch(error => {
@@ -170,8 +176,14 @@ async function getChallenge() {
       },
     });
 
-    if (response.status === 401) {
-      const challengeResponse = await response.json();
+    const responseBody = await response.text();
+    const data = JSON.parse(responseBody);
+
+    if (data.message == "rate limited") {
+      window.location.href = "/limited"; // Redirect to /limited endpoint
+      return;
+    } else {
+      const challengeResponse = JSON.parse(responseBody);
       const challenge = challengeResponse.WWW_Authenticate.challenge;
       const salt = challenge.salt;
       const maxNumber = challenge.maxnumber;
@@ -201,10 +213,8 @@ async function getChallenge() {
       } else {
         console.error("Error finding solution")
       }
-    } else {
-      console.error("Error getting challenge")
     }
   } catch (error) {	
     console.error("Error: " + error.message);
   }
-} 
+}

@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import { randomBytes } from "node:crypto";
 import { createHash, createHmac } from "node:crypto";
 import { createChallenge } from "altcha-lib";
+import { limiting } from "./watchman/watchman" 
 import https from "node:https";
 import axios from "axios";
 import multer from "multer";
@@ -54,29 +55,14 @@ const upload = multer({
   },
 });
 
-const logDir = "logs"; // Might make a config ffor this, but is it needed?
+const logDir = "logs"; // Might make a config for this, but is it needed?
 const logFilePrefix = "access_logs";
-
-const logger = (req: any, res: any, next: any) => { // Log all requests to a file
-  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-  const logMessage = `[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`;
-  
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir);
-  }
-  
-  const date = new Date();
-  const logFileName = `${date.toISOString().split('T')[0]}_${logFilePrefix}.log`;
-  const logFilePath = path.join(logDir, logFileName);
-  
-  fs.appendFileSync(logFilePath, logMessage + '\n');  
-  next();
-};
 
 const app: any = express();
 const hmacKey = randomBytes(16).toString("hex");
 let captchaList : any = {};
 const maxCaptcha = 2;
+const watchman = new limiting;
 let captchaIndex = 0; // keep track of the current index in the circular queue
 
 app.use(express.static("images"));
@@ -84,7 +70,6 @@ app.use(express.static("styles"));
 app.use(express.static("scripts"));
 app.set('view engine', "ejs");
 app.use(express.json());
-app.use(logger);
 // --------------------------------------------------
 // Put all functions here
 
@@ -111,10 +96,44 @@ const validateCaptcha = async (req: any) => {
   }
 };
 
+const dropRequest = (ip: string, req: any, res: any, reason: string) => {
+  watchman.dropRequest(ip);
+  res.status(401).send({message: "rate limited"});
+};
+
+const logger = (req: any, res: any, next: any) => { // Log all requests to a file
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  watchman.addRequest(ip);
+  const logMessage = `[${new Date().toISOString()}] -- ${ip} --  ${req.method} ${req.url}`;
+  
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
+  }
+  
+  const date = new Date();
+  const logFileName = `${date.toISOString().split('T')[0]}_${logFilePrefix}.log`;
+  const logFilePath = path.join(logDir, logFileName);
+  
+  fs.appendFileSync(logFilePath, logMessage + '\n');  
+  next();
+};
+app.use(logger);
+
 // --------------------------------------------------
 // Routes only beyond this point
 
-app.get("/", (req: any, res: any) => {
+app.get("/", async (req: any, res: any) => {
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  let score = await watchman.checkRequest(ip);
+  if (score >= 100) {
+    watchman.dropRequest(ip)
+    res.render("rateLimited")
+    return;
+  } else if (score == -2) {
+    watchman.dropRequest(ip)
+    res.status(401).send({message: "You have been banned"});
+    return;
+  }
   res.render("index", {fileLimit: fileSizeLimit, siteKey: config.siteKey});
 })
 
@@ -122,7 +141,19 @@ app.get("/favicon.ico", (req: any, res: any) => {
 	res.download("https://ratterscanner.com/favicon.ico")
 })
 
-app.get("/report", (req: any, res: any) => {
+app.get("/report", async (req: any, res: any) => {
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  let score = await watchman.checkRequest(ip);
+  if (score >= 100) {
+    watchman.dropRequest(ip)
+    res.render("rateLimited")
+    return;
+  } else if (score == -2) {
+    watchman.dropRequest(ip)
+    res.status(401).send({message: "You have been banned"});
+    return;
+  }
+
     let appID = req.query.appID;
     let downloadCount = req.query.downloads; // Taking downloads in the url is a bad idea because someone can easily manipulate it
     if (appID == "undefined"){
@@ -191,6 +222,22 @@ app.get("/report", (req: any, res: any) => {
 })
 
 app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { // TODO: debloat this class
+
+  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  let score = await watchman.checkRequest(ip);
+  if (score >= 100) {
+    dropRequest(ip, req, res, "Rate limit reached")
+    return;
+  } else if (score == -2) {
+    res.status(401).send({message: "You have been banned"});
+    return;
+  } else if (score == -3) {
+    console.log("Request denied, too many files uploaded")
+    watchman.addFileUpload(ip); // This is here to prevent people from constantly sending files while they have been timed out
+    res.status(401).send({message: "You are uploading files too fast, slow down"});
+    return;
+  }
+
   // ---------------------------- POW rate limiting
   const authorization = req.get("Authorization");
   if (authorization == undefined) {
@@ -200,8 +247,8 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
       console.log("Generating POW verification")
       const challenge = await createChallenge({ // Generate a new random challenge with a specified complexity
         hmacKey: hmacKey,
-        maxNumber: 250000
-      }); // TODO: Increace the challenge complexity based on factors like load, number of requests etc
+        maxNumber: 950000 + (score * 4500) // Increase complexity based on score, this will probbly need to be tweaked
+      });
 
       if (Object.keys(captchaList).length >= maxCaptcha) { // Removes the oldest captcha if the que reaches the limit
         delete captchaList[Object.keys(captchaList)[captchaIndex % maxCaptcha]];
@@ -312,7 +359,7 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
   formData.append("file", fileBuffer, {
     filename: req.file.originalname
   });
-
+  watchman.addFileUpload(ip);
   console.log("Sending to ratterscanner");
 
   const options = {
@@ -358,6 +405,10 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
 app.get("/safe", function (req: any, res: any) {
   const data = JSON.parse(req.query.data);  
   res.render("safe", {fileName: data.fileName, downloadLink: data.fileDownload});
+});
+
+app.get("/limited", async function (req: any, res: any) {
+  res.render("rateLimited");
 });
 
 app.use((err : any, req : any, res : any, next : any) => { // Catch Files that are too large
