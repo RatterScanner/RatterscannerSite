@@ -28,7 +28,7 @@ document.getElementById("file-input").addEventListener("change", (e) => {
 });
 
 document.querySelector(".close-popup").addEventListener("click", function() {
-  URLSubmitButton.innerHTML = "Downloading";
+  //URLSubmitButton.innerHTML = "Downloading";
   document.querySelector(".popup-box").style.display = "none";
 });
 
@@ -36,11 +36,15 @@ async function submitFile() {
   if (submitted) {
     return; // The user has already pressed the submit button
   }
-  submitButton.innerHTML = 'Validating';
+  submitButton.innerHTML = "Validating";
   console.log("Submitted file")
 
   submitted = true;
   let authData = await getChallenge();
+  if (authData == undefined) {
+    submitButton.innerHTML = "Submit";
+    return;
+  }
   submitButton.innerHTML = '<img src="upload.gif" alt="Submit">';
   sendFile(authData, file)
 };
@@ -59,6 +63,7 @@ async function sendFile(auth, file) {
   const timeoutId = setTimeout(() => {
     controller.abort();
     alert("Request timed out");
+    submitButton.innerHTML = "Submit";
     window.location.reload();
     submitted = false; // Reset submitted here
   }, 60000);
@@ -74,32 +79,33 @@ async function sendFile(auth, file) {
   .then(response => response.text()) // Get the response as text (HTML)
   .then(html => {
     clearTimeout(timeoutId);
-    if (html.includes("rateLimited")) { // Check if the response is the rateLimited page
-      document.body.innerHTML = html;
+    const data = JSON.parse(html);
+    if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
+      submitButton.innerHTML = "Submit";
+      alert(data.message);
+    } else if (data.message.includes("File is safe")) {
+      const sendData = {
+        fileName: data.fileName,
+        fileDownload: data.download
+      };
+      const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+      submitButton.innerHTML = "Submit";
+      window.location.href = `/safe${queryString}`;
+    } else if (data.message.includes("File is malicious")) {
+      const sendData = {
+        fileName: data.fileName,
+      };
+      const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
+      submitButton.innerHTML = "Submit";
+      window.location.href = `/malicious${queryString}`;
     } else {
-      const data = JSON.parse(html);
-      if (!(data.message.includes("Jar file uploaded successfully") || data.message.includes("File is safe"))) {
-        alert(data.message);
-      } else if (data.message.includes("File is safe")) {
-        const sendData = {
-          fileName: data.fileName,
-          fileDownload: data.download
-        };
-        const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-        window.location.href = `/safe${queryString}`;
-      } else if (data.message.includes("File is malicious")) {
-        const sendData = {
-          fileName: data.fileName,
-        };
-        const queryString = `?data=${encodeURIComponent(JSON.stringify(sendData))}`;
-        window.location.href = `/malicious${queryString}`;
-      } else {
-        const appID = data.appID;
-        window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
-      }
+      const appID = data.appID;
+      submitButton.innerHTML = "Submit";
+      window.location.href = "/report?appID=" + appID + "&downloads=" + data.downloads;
     }
   })
   .catch(error => {
+    submitButton.innerHTML = "Submit";
     if (error.name === "AbortError") {
       console.log("Request was aborted");
     } else {
