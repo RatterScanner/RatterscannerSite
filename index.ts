@@ -28,8 +28,10 @@ interface Config {
 let config: Config | undefined;
 
 try {
-  const data = fs.readFileSync("config.json", "utf8");
-  config = JSON.parse(data);
+  if (!(process.argv.includes("-test"))) {
+    const data = fs.readFileSync("config.json", "utf8");
+    config = JSON.parse(data);
+  }
 } catch (error) {
   console.error("Error reading config file:", error);
   throw new Error("Program Terminated");
