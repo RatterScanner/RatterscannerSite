@@ -234,6 +234,7 @@ app.post("/upload", upload.single("jarFile"), async (req: any, res: any) => { //
     dropRequest(ip, req, res, "Rate limit reached")
     return;
   } else if (score == -2) {
+    console.log("IP " + ip + " has been banned")
     res.status(401).send({message: "You have been banned"});
     return;
   } else if (score == -3) {
