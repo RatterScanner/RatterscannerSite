@@ -1,20 +1,21 @@
 body {
-  background-color: #111827;
-  font-family: Arial, sans-serif;
+  background-color: #2e3440;
+  font-family: "Inter", sans-serif;
   margin: 0;
   padding: 0;
+  height: 100vh; /* we set page size here since its the body - this will also affect stuff like title - it also helps with footer calc */
 }
-
+/* aside from some light work phone should need much on this page */
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  padding: 100px; /* We pad here so we can move this around */
 }
 
 .box {
-  background-color: #1f2937;
-  padding: 20px;
+  background-color: #3b4252;
+  padding: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   width: 400px;
 }
@@ -23,27 +24,31 @@ body {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
-  background-color: #1f2937;
+  background-color: #3b4252;
   padding: 10px;
-  border-bottom: 1px solid #636161;
+  border-bottom: 1px solid #e5e9f076;
 }
 
 .tab {
-  background-color: #1f2937;
+  background-color: #434c5e;
   border: none;
   padding: 10px 20px;
+  font-family: "Inter", sans-serif;
   font-size: 16px;
   cursor: pointer;
   color: #fff;
 }
 
 .tab:hover {
-  background-color: #616161;
+  background-color: #5e81ac;
 }
 
 .tab.active {
-  background-color: #111827;
+  background-color: #4c566a;
   font-weight: bold;
+}
+.tab.active:hover {
+    background-color: #5e81ac; /* css is annoying wtf */
 }
 
 .box-content {
@@ -63,16 +68,18 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  border: 1px solid #636161;
+  border: 1px solid #e5e9f076;
   margin-bottom: 20px;
-  background-color: #1f2937;
+  background-color: #3b4252;
 }
 
-.file-upload img {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 10px;
-}
+    .svg {
+        width: 70px;
+        fill: #d8dee9f7;
+        height: 70px;
+        padding-bottom: 10px;
+
+    }
 
 .file-upload input[type="file"] {
   display: none;
@@ -82,11 +89,11 @@ body {
   cursor: pointer;
   padding: 10px 20px;
   border: none;
-  background-color: #1f2937;
+  background-color: #3b4252;
   font-size: 16px;
   color: #fff;
 }
-
+/* peak name tbf */
 .or-text {
   font-size: 16px;
   margin-bottom: 20px;
@@ -97,16 +104,17 @@ body {
 .input-box {
   display: flex;
   align-items: center;
+
   margin-bottom: 20px;
 }
 
 .input-box input[type="text"] {
   padding: 10px;
-  border: 1px solid #636161;
+  border: 1px solid #e5e9f076;
   width: 200px;
-  background-color: #1f2937;
+  background-color: #3b4252;
   color: #fff;
-  height: 23px;
+  height: 25px;
 }
 
 .input-box button[type="button"] {
@@ -128,21 +136,20 @@ body {
 .button-5 {
   align-items: center;
   background-clip: padding-box;
-  background-color: #0b5697;
-  border: 1px solid transparent;
-  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+  background-color: #5e81ac;
+  border: 2px solid transparent;
+  box-shadow: rgba(46, 52, 64, 0.35) 1px 1px 1px -1px;
   box-sizing: border-box;
   color: #fff;
   cursor: pointer;
   display: inline-flex;
-  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size: 16px;
   font-weight: 600;
   justify-content: center;
   line-height: 1.25;
-  margin: 0;
+  margin: 1;
   min-height: 3rem;
-  padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+  padding: calc(1.5rem - 1px) calc(1.5rem - 1px);
   position: relative;
   text-decoration: none;
   transition: all 250ms;
@@ -156,29 +163,40 @@ body {
 
 .button-5:hover,
 .button-5:focus {
-  background-color: #0a4c73;
-  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+  background-color: #2e3440;
 }
-
-.button-5:hover {
-  transform: translateY(-1px);
-}
-
+/* someone explain why we need so much transforming its really fine bro */
 .button-5:active {
-  background-color: #083a5e;
-  box-shadow: rgba(0, 0, 0, .06) 0 2px 4px;
-  transform: translateY(0);
+  background-color: #2e3440;
 }
 
 footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background-color: #111827;
-  padding: 10px;
-  text-align: center;
-  color: #fff;
-  z-index: 1;
+    margin-top: auto;
+    font-weight: normal;
+    text-decoration: none;
+    padding: 10px;
+    position: absolute;
+    color: gray; /* someone fact check this is the right color from ratterscanner main site */
+    text-align: center;
+    clear: both;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+}
+
+footer:before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50px;
+    right: 50px;
+    border-top: 1px solid;
+    border-image: linear-gradient(to right, #81a1c1, #5e81ac, #81a1c1) 1;
+}
+footer a {
+  color:#fff;
+  font-weight: normal; /* imma force normal font style since idk but I swear we have some weird stuff going on with fonts */
+  text-decoration: none; /* raterrscanner.com uses no this so ok */
 }
 
 .file-upload label {
@@ -209,7 +227,7 @@ footer {
 
 .popup-content {
   position: relative;
-  background-color: #1f2937;
+  background-color: #2e3440;
   color: #ffffff;
   padding: 20px;
   width: 300px;
@@ -226,6 +244,6 @@ footer {
 }
 
 .close-popup:hover {
-  color: #929292;
+  color: #929292; /* icba color concept this ngl */
 }
 
