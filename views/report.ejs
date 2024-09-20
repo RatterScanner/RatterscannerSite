@@ -1,551 +1,143 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-	<title>RatterScanner | Scan report</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<meta name="theme-color" content="#000000">
-	<link rel="icon" href="https://ratterscanner.com/favicon.ico">
-	<link rel="manifest" href="https://ratterscanner.com/manifest.json">
-	<link rel="apple-touch-icon" href="https://ratterscanner.com/logo192.png">
-
-	<meta property="og:type" content="website">
-	<meta property="og:site_name" content="RatterScanner | Scan report">
-	<meta property="og:description" content="Results for the analysis of ID <%= locals.appID %>">
-	<meta property="og:color" content="#ff7878">
-
-	<style>
-		@keyframes fadeIn {
-			from {
-				opacity: 0;
-			}
-
-			to {
-				opacity: 1;
-			}
-		}
-
-		body {
-			font-family: Arial, sans-serif;
-			background-color: #111827;
-			height: 100%;
-			margin-left: 10px;
-		}
-
-		.center {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		.white {
-			color: #fff;
-		}
-
-		.flags {
-			margin-top: 10px;
-		}
-
-		.flag {
-			margin: 10px;
-			padding: 0;
-			border-radius: 5px;
-			color: #fff;
-			margin-top: 0;
-			margin-bottom: 10px;
-			display: inline-block;
-			position: relative;
-		}
-
-		.flag-color {
-			position: absolute;
-			left: 0;
-			top: 0;
-			bottom: 0;
-			width: 10px;
-			border-radius: 5px 0 0 5px;
-			z-index: 1;
-		}
-
-		.container {
-			padding-left: 10px;
-			background-color: #1f2937;
-			border-radius: 5px;
-			padding: 20px;
-		}
-
-		.standaloneContainer,
-		.category {
-			padding: 0;
-			border-radius: 5px;
-			color: #fff;
-			margin-top: 0;
-			margin-bottom: 10px;
-			display: block;
-			position: relative;
-		}
-
-		.critical .flag-color {
-			background-color: red;
-		}
-
-		.warn .flag-color {
-			background-color: rgb(212, 212, 7);
-		}
-
-		.safe .flag-color {
-			background-color: green;
-		}
-
-		.info .flag-color {
-			background-color: white;
-		}
-
-		.button {
-			background-color: #337ab7;
-			color: #fff;
-			padding: 10px 20px;
-			border: none;
-			border-radius: 5px;
-			cursor: pointer;
-			text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-		}
-
-		.button:hover {
-			background-color: #23527c;
-		}
-
-		.category {
-			margin-left: 5px;
-
-			.collapsible {
-				background-color: #ffffff18;
-				color: #fff;
-				width: 300px;
-				cursor: pointer;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				border: none;
-				border-radius: 10px;
-				padding-left: 15px;
-				padding-right: 15px;
-				transition: 200ms;
-			}
-
-			.collapsible.opened,
-			.collapsible:hover {
-				background-color: #ffffff20;
-			}
-
-			.collapsible:after {
-				content: '\002B';
-				color: white;
-				font-weight: bold;
-				float: right;
-				margin-left: 5px;
-			}
-
-			.opened:after {
-				content: "\2212";
-			}
-
-			.content {
-				display: none;
-				animation: 0.4s fadeIn;
-				/* https://imgur.com/a/tXPzZ8B */
-				border-left-width: 2px;
-				border-left-color: #fff;
-			}
-
-		}
-
-		.warning {
-			padding: 8px;
-			padding-left: 15px;
-			margin: 10px 15px 10px 5px;
-			background-color: #ffffff12;
-			border-radius: 10px;
-		}
-	</style>
-
-	<style>
-		body {
-			margin-top: 8px;
-		}
-
-		#footer {
-			position: relative;
-			text-align: center;
-			/*padding: 10px;*/
-			padding-bottom: 10px;
-			padding-top: 10px;
-			width: 100%;
-			bottom: 0px;
-			left: 0px;
-		}
-
-		#footer>div {
-			display: inline-block;
-			margin-bottom: 0.5rem;
-		}
-
-		#footer>div>* {
-			display: inline;
-		}
-
-		.text-gray-300 {
-			color: #d1d5db;
-		}
-
-		.text-gray-300:hover {
-			color: #ffffff;
-		}
-
-		.mx-2 {
-			margin-left: 0.5rem;
-			margin-right: 0.5rem;
-		}
-
-		.text-gray-500 {
-			color: #737373;
-		}
-
-		.text-sm {
-			font-size: 0.875rem;
-		}
-	</style>
+	<title>Scan report</title>
+	<link rel="stylesheet" href="reportStyle.css">
+    <link rel="icon" href="https://ratterscanner.com/favicon.ico">
+    <script> 
+        let completed = "<%= locals.completed %>"
+        let position = "<%= locals.quePosition %>"
+        let percentComplete = "<%= locals.percentComplete %>"
+        let dynamicAnalysisStatus = "<%= locals.status %>"
+        let scanID = "<%= locals.appID %>"
+        let downloadCount = Number("<%= locals.downloads %>")
+        console.log(downloadCount)
+        let scanReport
+    </script>
+    <% function fileSizeConverter(bytes) {
+        if (bytes === 0) {
+            return "0 B";
+        };
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    } %> 
 </head>
-
 <body>
-	<main id="root">
+    <input type="hidden" id="scanDataID" value="<%= JSON.stringify(jsonReport) %>">
+    <% if (locals.completed == "waiting") { %>
+        <h1 style="text-align: center;">File is in the que</h1>
+        <p style="text-align: center;">Another file is being scanned and your file has been placed in the que</p>
+        <p id="quePositionElement" style="text-align: center;">ERROR getting position</p>
+        <div class="loading-animation">
+            <img id="myImage" src="ratterscanerPixelArtNoBackground.png" alt="LoadingRat">
+        </div>   
+    <% } else if (!(locals.completed == "completed")) { %>
+        <h1 style="text-align: center;">Scan in progress</h1>
+        <p id="staticAnalysisStatus" style="text-align: center;">ERROR getting status</p>
+        <p id="dynamicAnalysisStatus" style="text-align: center;">ERROR getting status</p>
+        <div class="loading-animation">
+            <img id="myImage" src="ratterscanerPixelArtNoBackground.png" alt="LoadingRat">
+        </div>
+    <% } else { %> 
+        <div class="container">
+            <h1>Report for scan ID: <%= locals.appID %> </h1>
+            <div class="divider"></div>
+            <div class="columns">
+                <div id="resultOverview" class="column">
+                    <p>Overall result: <span class="malicious">malicious</span></p>
+                </div>
+                <div class="column">
+                    <p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
+                </div>
+                <div class="column">
+                    <p>Size: <%= fileSizeConverter(jsonReport.returnvalue.regex.fileProperties.size) %></p>
+                  </div>
+                <div class="column">
+                    <p>SHA256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
+                </div>
+                <div class="column">
+                    <p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
+                </div>
+                <div class="column">
+                    <p>SHA12: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <!-- ----------------------------------------- -->
+            <span id="modrinthNotice" class=""></span>
+            <h1>Static analysis</h1>
+            <div class="box-container">
+                <div class="box-chain">
+                    <div id="maliciousBox" class="box" style="background-color: #e63232;">
+                        <p style="margin: 10px;">Malicious indicators</p>
+                    </div>
+                    <div id="staticMaliciousTemplate">
+                    </div>
+                </div>
+            <div>
+            <div class="box-container">
+                <div class="box-chain">
+                    <div class="box" style="background-color: #edd040;">
+                        <p style="margin: 10px;">Suspicious indicators</p>
+                    </div>
+                    <div id="staticSuspiciousTemplate"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<% if (!(locals.completed == "completed")) { %>
-		<div class="center white">
-			<img src=<%=locals.gifName || "Loading" %> alt="loading"> <br>
-			<script>
-				setTimeout(() => {
-					location.reload()
-				}, 5000);
-			</script>
-		</div>
-		<div class="center white">
-			<% if (locals.completed == "waiting") { %>
-			Another file is in the que, please wait </br>
-			Your position in the que: <%= locals.quePosition || "Error getting que position please report this to a developer" %>
-			<% } else{ %>
-			Static analysis status: <%= locals.percentage || "Error getting percentage, please report this to a developer" %>% complete </br>
-			Dynamic analysis status: <%= locals.status || "Error getting status, please report this to a developer" %>
-			<% } %>
-		</div>
+        <!-- ---------------------------------- -->
 
-		<% } else { %>
-		<button class="button dark-blue" style="color: #fff;" onclick="window.location.href = '/'">Go back</button>
-		<button class="button dark-blue" style="color: #fff;" onclick="toggleAdditionalInfos()" id="btn-addtinfo">Enable Additional Infos</button>
-		<div class="center white">
-			<h2>Report for ID: <%= locals.appID %></h2>
-		</div>
+        <div class="divider"></div>
+            <h1>Network analysis</h1>
+            <div class="box-container">
+                <div class="box-chain">
+                    <div class="box" style="background-color: #e63232;">
+                        <p style="margin: 10px;">Malicious connections</p>
+                    </div>
+                    <div id="dynamicMaliciousTemplate"></div>
+                    </div>
+                </div>
+            <div>
+            <div class="box-container">
+                <div class="box-chain">
+                    <div class="box" style="background-color: #edd040;">
+                        <p style="margin: 10px;">Unknown connections</p>
+                    </div>
+                    <div id="dynamicUnknownTemplate"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-		<% 
-		var wObfuscation = false
-		jsonReport?.returnvalue?.regex?.flagsTriggered?.forEach(function(flag) {
-			if (flag.obfuscation && flag.level > 0)
-				wObfuscation = true
-		})
-		
-		var wNetworkBehaviour = false
-		if(jsonReport?.returnvalue?.networkAnalysis?.generalResults?.behaviour?.length > 0)
-			wNetworkBehaviour = true
+        <!-- --------------- -->
 
-		if (wObfuscation || wNetworkBehaviour) { /*add any other warning to this condition*/%>
-		<div class="category white">
-			<button type="button" class="collapsible">
-				<h3>⚠️ Warnings</h3>
-			</button>
-			<div class="content">
-				<% if (wObfuscation) { %>
-				<div class="warning">
-					<p>The scanned file possibly contains obfuscated Java bytecode or other tricks which are used to conceal the code's functionality. This can indicate malicious behavior, but it is also often used in legitimate paid software to protect against code theft.</p>
-					<p><b>Generally speaking:</b></p>
-					<p>Obfuscation in free and or "opensource" mods indicate malicious intent, it is however not definitive proof of a file being malicious. Obfuscation is generally speaking okay for paid software as it protects the mods source from cracking and theft. A non paid mod containing obfuscation is very suspicious.</p>
-					<p><b>What does obfuscation do?</b></p>
-					<p>Obfuscation causes code to be mangled and harder to read, which in turn makes it harder to scan. Obfuscation aims to not have any affect on the end result of the code but only the readibility of the code (See the image below).</p>
-					<p>Obfuscation can have a large impact on the results shown by most static analyis scanners, which is why it is important to <b>be catious around obfuscated code</b>.</p>
-					<p><i>Note: Ratter Scanner's obfuscation flags may trigger on non obfuscated code. Obfuscation detection is challenging, and flags are intentionally kept sensitive. Manual analysis may be needed to confirm safety in an obfuscated file.</i></p>
-					<h5><code>The image below shows an example of obfuscation in JavaScript.</code></h5>
-					<img src="https://cdn.ratterscanner.com/raw/obfuscated.png" alt="Example of obfuscation">
-				</div>
-				<% } 
-				if (wNetworkBehaviour) { %>
-				<div class="warning">
-					<% jsonReport.returnvalue.networkAnalysis.generalResults.behaviour.forEach(behaviour => { %>
-					<p><%= behaviour %></p>
-					<% }) %>
-				</div>
-				<% } %>
-			</div>
-		</div>
-		<% } %>
+        <div class="divider"></div>
+            <span class="malicious">WARNING these flags are in development and could be completley incorrect! They are only provided as information!</span>
+            <h1>Dev flags</h1>
+            <div class="box-container">
+                <div class="box-chain">
+                    <div class="box" style="background-color: #000000;">
+                        <p style="margin: 10px;">DEV FLAGS</p>
+                    </div>
+                    <div id="devFlagTemplate">
+                    </div>
+                </div>
+            <div>
+        </div>
 
-		<div class="category white">
-			<button type="button" class="collapsible">
-				<h3>Static analysis</h3>
-			</button>
-			<div class="content">
-				<div class="flags">
-					<% if (locals.downloads > 10000) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							This mod was found on modrinth with 10K+ downloads, it is most likely safe.
-						</div>
-					</div>
-					<% } %>
-
-					<% let flags = []; %>
-					<% try { %>
-					<% if (jsonReport && jsonReport.returnvalue && jsonReport.returnvalue.regex && jsonReport.returnvalue.regex.flagsTriggered) { %>
-					<% jsonReport.returnvalue.regex.flagsTriggered.forEach(function(flag) { %>
-					<% flags.push(flag); %>
-					<% }); %>
-
-					<% // Sort flags by severity level first (descending), then alphabetically by description
-									flags.sort((a, b) => {
-											if (b.level !== a.level) {
-													return b.level - a.level; // Sort by level descending
-											}
-											return a.description.localeCompare(b.description); // Sort alphabetically
-									}); %>
-
-					<% let hasCriticalOrWarnFlag = false; %>
-					<% let hasInfoFlag = false; %>
-
-					<% // Render sorted flags
-									flags.forEach(function(flag) { %>
-					<% if (flag.level >= 1) { %>
-					<% hasCriticalOrWarnFlag = true; %>
-					<% if (flag.level == 5) { %>
-					<div class="flag critical">
-						<div class="flag-color" title="Level 5"></div>
-						<div class="container">
-							Known malicious software identified as: <b><%= flag.description %></b>
-							<br>
-						</div>
-					</div>
-					<% } else { %>
-					<div class="flag <% if (flag.level >= 3) { %>critical<% } else { %>warn<% } %>">
-						<div class="flag-color" title="Level <%= flag.level %>"></div>
-						<div class="container">
-							<%- flag.description.replace(/`([^`]+)`/g, '<b>$1</b>') %>
-							<br>
-						</div>
-					</div>
-					<% } %>
-					<% } else { %>
-					<% hasInfoFlag = true; %>
-					<div class="flag info" style="display: none;">
-						<div class="flag-color" title="Level 0"></div>
-						<div class="container">
-							<%= flag.description %>
-							<br>
-						</div>
-					</div>
-					<% } %>
-					<% }); %>
-
-					<% if (!hasCriticalOrWarnFlag && !hasInfoFlag) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							The mod was scanned and no suspicious code was detected automatically. However, this doesn't mean that the mod is 100% safe.
-						</div>
-					</div>
-					<% } %>
-
-					<% if (!hasCriticalOrWarnFlag && hasInfoFlag) { %>
-					<div class="flag safe" id="infoflag">
-						<div class="flag-color"></div>
-						<div class="container">
-							The mod was scanned and no significant issues were found. Only informational flags are present.
-						</div>
-					</div>
-					<% } %>
-					<% } else { %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							This mod couldn't be scanned.
-						</div>
-					</div>
-					<% } %>
-					<% } catch (error) { %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							An error occurred while scanning the mod: <%= error.message %>
-						</div>
-					</div>
-					<% } %>
-				</div>
-			</div>
-		</div>
-
-		<div class="category white">
-			<button type="button" class="collapsible">
-				<h3>Malicious connections</h3>
-			</button>
-			<div class="content">
-				<div class="flags">
-					<% try { %>
-					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.length === 0) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							No malicious connections were made.
-						</div>
-					</div>
-					<% } else { %>
-					<% jsonReport.returnvalue.networkAnalysis.generalResults.maliciousConnections.forEach(function(flag) { %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							<%= flag %>
-							<br>
-						</div>
-					</div>
-					<% }); %>
-					<% } %>
-					<% } catch { %>
-					<% console.error(`Could not read malicious connections for id ${locals.appID}`); %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							This mod couldn't be scanned.
-						</div>
-					</div>
-					<% } %>
-				</div>
-			</div>
-		</div>
-
-
-		<div class="category white">
-			<button type="button" class="collapsible">
-				<h3>Unknown connections</h3>
-			</button>
-			<div class="content">
-				<div class="flags">
-					<% try { %>
-					<% if (jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.length === 0) { %>
-					<div class="flag safe">
-						<div class="flag-color"></div>
-						<div class="container">
-							No unknown connections were made.
-						</div>
-					</div>
-					<% } else { %>
-					<% jsonReport.returnvalue.networkAnalysis.generalResults.unknownConnections.forEach(function(flag) { %>
-					<div class="flag warn">
-						<div class="flag-color"></div>
-						<div class="container">
-							<%= flag %>
-							<br>
-						</div>
-					</div>
-					<% }); %>
-					<% } %>
-					<% } catch { %>
-					<% console.error(`Could not read unknown connections for id ${locals.appID}`); %>
-					<div class="flag critical">
-						<div class="flag-color"></div>
-						<div class="container">
-							This mod couldn't be scanned.
-						</div>
-					</div>
-					<% } %>
-				</div>
-			</div>
-		</div>
-
-		<div class="category white">
-			<button type="button" class="collapsible">
-				<h3>File info</h3>
-			</button>
-			<div class="content">
-				<% if (!jsonReport || !jsonReport.returnvalue) { %>
-				<% console.error(`Could not read file properties for id ${locals.appID}`); %>
-				<p>This scan does not contain file properties.</p>
-				<% } else if (!jsonReport.returnvalue.regex || !jsonReport.returnvalue.regex.fileProperties) { %>
-				<% console.error(`Could not read file properties for id ${locals.appID}`); %>
-				<p>This scan does not contain file properties.</p>
-				<% } else { %>
-				<p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
-				<p>SHA 256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
-				<p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
-				<p>SHA 512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
-				<p>
-					Download: <a href=<%= jsonReport.returnvalue.regex.fileProperties.downloadLink %>>Normal</a> — <a href=<%= jsonReport.returnvalue.regex.fileProperties.deobfDownloadLink %>>Deobfuscated</a>
-				</p>
-				<% } %>
-			</div>
-		</div>
-
-		<% } %>
-
-		<script>
-			var collapsibles = document.getElementsByClassName("collapsible")
-
-			for (var i = 0; i < collapsibles.length; i++) {
-				collapsibles[i].addEventListener("click", function() {
-					this.classList.toggle("opened")
-					var content = this.nextElementSibling
-					if (content.style.display == "block") {
-						content.style.display = "none"
-					} else {
-						content.style.display = "block"
-					}
-				});
-			}
-		</script>
-
-	</main>
-
-	<footer id="footer">
-		<div>
-			<a href="https://ratterscanner.com/terms" class="text-gray-300 hover:text-white mx-2">Terms and Conditions</a>
-			<span class="text-gray-500">|</span><a href="https://ratterscanner.com/privacy" class="text-gray-300 hover:text-white mx-2">Privacy Policy</a>
-		</div>
-		<p class="text-gray-500 text-sm">© 2024 RatterScanner. All rights reserved.</p>
-	</footer>
-	<script>
-		const root = document.getElementById('root')
-		var height = (document.getElementById('footer').offsetHeight + 8) + "px"
-		root.style.minHeight = `calc(100vh - ${height} - 8px)`
-	</script>
-
-	<script>
-		if (localStorage.getItem('rs-additionalinfos') == 'true') {
-			displayAdditionalInfos(true)
-			document.getElementById('btn-addtinfo').innerHTML = 'Disable Additional Infos'
-		}
-
-		function toggleAdditionalInfos() {
-			var value = !(localStorage.getItem('rs-additionalinfos') == 'true')
-			localStorage.setItem('rs-additionalinfos', value)
-			document.getElementById('btn-addtinfo').innerHTML = `${value ? "Disable" : "Enable"} Additional Infos`
-			displayAdditionalInfos(value)
-		}
-
-		function displayAdditionalInfos(value) {
-			document.querySelectorAll('.flag.info').forEach(elem => {
-				elem.style.display = value ? "" : "none"
-			})
-			var infoflag = document.getElementById('infoflag')
-			if(infoflag != null)
-				infoflag.style.display = value ? "none" : ""
-		}
-	</script>
+        <div class="contents-bar">
+            <ul> <!--Axle make the navbar work plz-->
+                <li>File info</li>
+                <li>Static analysis</li>
+                <li>Network analysis</li>
+                <li>File operations</li>
+                <li>Dev flags</li>
+            </ul>
+        </div>
+    <% } %>
+    <script src="reportScript.js"></script>
 </body>
-
 </html>
