@@ -6,30 +6,35 @@
     <title>Upload a file</title>
     <link rel="stylesheet" href="indexStyle.css">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?compat=recaptcha" async defer></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400&amp;display=swap">
     <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
     <link rel="icon" href="https://ratterscanner.com/favicon.ico">
 </head>
+
 <body>
     <div class="container">
         <div class="box">
             <div class="tabs">
-              <button class="tab active">Upload a file</button>
-              <button class="tab">View a report</button>
-              <button class="tab">Credits and statistics</button> <!--This is quints job-->
+              <button class="tab active">Jar Scanner</button>
+              <button class="tab">View a Report</button>
+              <button class="tab">Credits and Statistics</button> <!--This is quints job--> <!-- Realistically can be done by anyone - probably quint though ngl -->
             </div>
             <div class="box-content">
+
                 <!-- Tab 1 -->
-                <p class="tab-text">Upload a .jar file to be scanned</p>
+                <p class="tab-text">Upload a file to get started <b>(.jar)</b></p>
                 <div class="file-upload">
                     <label for="file-input">
-                    <img src="fileIcon.png" alt="File upload icon">
-                    Click to upload
+                    <svg class="svg" viewBox="0 0 35 39" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m22.0092457 0 7.9907543 10.0183757v21.9816243h-28v-32zm-5.9841194 10-.0251458.0250873-.0251068-.0250873-5.6568542 5.6568542 1.4142135 1.4142136 3.2687475-3.2669805-.0009805 10.085h2l.0009805-10.084 3.2667865 3.2659805 1.4142135-1.4142136z" />
+                    </svg>
+                    Click to select a file<!--, or drag and drop it here -->
                     <input type="file" id="file-input" multiple>
                     </label>
                 </div>
                 <p class="or-text">or</p>
                 <div class="input-box">
-                    <input type="text" id="url-input" placeholder="Enter a URL to download from">
+                    <input type="text" id="url-input" placeholder="Enter a URL">
                     <button class="button-5" role="button" id="urlSubmit" onclick="submitURL(document.getElementById('url-input').value);">Submit</button>
                 </div>
             </div>
@@ -44,22 +49,24 @@
             </div>
             <div class="box-content" style="display: none;">
               <!-- Tab 3 -->
-              <p class="tab-text">Coming soon</p>
+              <p class="tab-text">Quint, Lenny, Sylus, Ghosty, Axle, Pandy, Gute Nacht</p>
             </div>
           </div>
     <div class="popup-box">
         <div class="popup-content">
             <span class="close-popup">x</span>
-            <p><h2>Submit the file</h2></p>
+            <p><h2>Captcha test</h2></p>
             <div id="fileInfo"></div>
             </br>
             <div class="g-recaptcha" data-sitekey=<%= locals.siteKey %>></div>
             </br>
-            <button class="button-5" role="button" id="file-submit" onclick="submitFile()">Submit</button> <!--There is prob a better way to go about this-->
+            <button class="button-5" role="button" id="file-submit" onclick="submitFile()">Continue</button> <!--There is prob a better way to go about this and I do not want to bother-->
         </div>
     </div>
     <footer>
-        <p>© Ratterscanner 2024 <a href="https://ratterscanner.com/terms">Terms</a> | <a href="https://ratterscanner.com/privacy">Privacy</a> </p>
+        <a href="https://ratterscanner.com/terms">Terms and Conditions</a> | <a href="https://ratterscanner.com/privacy">Privacy Policy</a>
+        <br>
+        <p>© 2024 RatterScanner. All rights reserved.</p>
     </footer>
     <script>const maxSize = "<%= fileLimit %>";</script>
     <script src="indexScript.js"></script>
