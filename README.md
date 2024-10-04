@@ -2,19 +2,18 @@
 
 A website made for RatterScanner that let the users see more details about a scan, from a file or a scan ID.
 
-You can test the website directly from [here](https://scan.ratterscanner.com/).
+This rewrite is currently not hosted.
 
-## Running
+## Screenshots
+![homepage image](screenshots/homepage.png)
 
-- Rename the config-example.json file to config.json and add your API key to "apiKey": "<apikeyGoHere>",
-- Add the cloudflare turnstile site key and secret key to  "captchaKey": "<secretKeyGoHere>" and "siteKey": "<siteKeygoHere>"
-- Make any other config changes 
-- Run `npm install` to download libraries
-- Run `npm run start` to start the webserver.
+## Running (dev server)
 
-# Config
-All configuration is done in the config.json file.
+- `npm i`
+- `npx vite dev`
 
 ## Contributing
-You are able to selfhost parts of the website. Some parts such as file uploading wont work on a selfhosted instance out of the box. We might make an easy testing process for this in the future.
-Feel free to suggest new features or improvements via github issues! Please assign issues that require modifications to the backend to @eGirlQuint
+You are able to selfhost parts of the website. 
+File submission will not work on a self-hosted instance without an API key. 
+A testing process for submission may be available in future.
+Feel free to suggest new features or improvements via Github issues! Please assign issues that require modifications to the backend to @eGirlQuint
