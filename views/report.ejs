@@ -1,11 +1,25 @@
+    <% function fileSizeConverter(bytes) {
+        if (bytes === 0) {
+            return "0KB";
+        };
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']; // we finna have YB files in ratterscanner
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + "" + sizes[i];
+    } %>
 <!DOCTYPE html>
 <html>
 <head>
 	<title>Scan report</title>
 	<link rel="stylesheet" href="reportStyle.css">
+    <meta name="description" content="Ratter Scanner Jar Scanner - Scanner">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400&amp;display=swap">
+    <meta property="og:title" content="Ratter Scanner Jar Scanner - Scanner"/>
+    <meta property="og:description" content="Use this to see if a .JAR file is malicious, use either a (.JAR) file or URL" />
+    <meta property="og:author" content="RatterScanner" />
     <link rel="icon" href="https://ratterscanner.com/favicon.ico">
     <script> 
-        let completed = "<%= locals.completed %>"
+        let completed = "<%= locals.completed %>" 
         let position = "<%= locals.quePosition %>"
         let percentComplete = "<%= locals.percentComplete %>"
         let dynamicAnalysisStatus = "<%= locals.status %>"
@@ -13,22 +27,13 @@
         let downloadCount = Number("<%= locals.downloads %>")
         console.log(downloadCount)
         let scanReport
-    </script>
-    <% function fileSizeConverter(bytes) {
-        if (bytes === 0) {
-            return "0 B";
-        };
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-    } %> 
+    </script> 
 </head>
 <body>
     <input type="hidden" id="scanDataID" value="<%= JSON.stringify(jsonReport) %>">
     <% if (locals.completed == "waiting") { %>
-        <h1 style="text-align: center;">File is in the que</h1>
-        <p style="text-align: center;">Another file is being scanned and your file has been placed in the que</p>
+        <h1 style="text-align: center;">File is in the queue</h1>
+        <p style="text-align: center;">Another file is being scanned and your file has been placed in the queue</p>
         <p id="quePositionElement" style="text-align: center;">ERROR getting position</p>
         <div class="loading-animation">
             <img id="myImage" src="ratterscanerPixelArtNoBackground.png" alt="LoadingRat">
@@ -45,32 +50,45 @@
             <h1>Report for scan ID: <%= locals.appID %> </h1>
             <div class="divider"></div>
             <div class="columns">
-                <div id="resultOverview" class="column">
-                    <p>Overall result: <span class="malicious">malicious</span></p>
+                <div id="resultOverview" class="result-text-area-div">
+                    <p>Overall result: <span class="malicious">This file is malicious</span></p> <!-- Am i high or does this just say everythin is malicious tbf -->
                 </div>
-                <div class="column">
+                <div class="result-text-area-div">
                     <p>File name: <%= jsonReport.returnvalue.regex.fileProperties.name.originalName %></p>
+                    <p></p>
                 </div>
-                <div class="column">
+                <div class="result-text-area-div">
                     <p>Size: <%= fileSizeConverter(jsonReport.returnvalue.regex.fileProperties.size) %></p>
-                  </div>
-                <div class="column">
-                    <p>SHA256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
                 </div>
-                <div class="column">
+                <div class="result-text-area-div">
                     <p>MD5: <%= jsonReport.returnvalue.regex.fileProperties.hash.MD5_hash %></p>
                 </div>
-                <div class="column">
-                    <p>SHA12: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p>
+                <div class="result-text-area-div">
+                    <p>SHA-256: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_256_hash %></p>
                 </div>
+                <!--
+                <div class="result-text-area-div">
+                    <p>SHA-512: <%= jsonReport.returnvalue.regex.fileProperties.hash.SHA_512_hash %></p> check this woriks someone since my scan id doesnt have zz
+                </div>
+                -->
             </div>
             <div class="divider"></div>
             <!-- ----------------------------------------- -->
             <span id="modrinthNotice" class=""></span>
-            <h1>Static analysis</h1>
+            
+            <h1>Static Analysis Results:</h1>
+            <div class="box-container">
+                    <div class="flags-box-mal-1">
+                        <ol id="staticMaliciousTemplate" class="static-ol">
+                            <a>The mod (Rainbow-1.1.1.jar) has been scanned using regex and 99 suspicious items were detected, 0 of these are of high severity.</a>
+                        </ol>
+                    
+                </div>
+            <div>
+                
             <div class="box-container">
                 <div class="box-chain">
-                    <div id="maliciousBox" class="box" style="background-color: #e63232;">
+                    <div id="maliciousBox" class="flags-box-mal">
                         <p style="margin: 10px;">Malicious indicators</p>
                     </div>
                     <div id="staticMaliciousTemplate">
@@ -79,7 +97,7 @@
             <div>
             <div class="box-container">
                 <div class="box-chain">
-                    <div class="box" style="background-color: #edd040;">
+                    <div class="flags-box-sus">
                         <p style="margin: 10px;">Suspicious indicators</p>
                     </div>
                     <div id="staticSuspiciousTemplate"></div>
@@ -91,10 +109,10 @@
         <!-- ---------------------------------- -->
 
         <div class="divider"></div>
-            <h1>Network analysis</h1>
+            <h1>Dynamic Analysis Results:</h1>
             <div class="box-container">
                 <div class="box-chain">
-                    <div class="box" style="background-color: #e63232;">
+                    <div class="flags-box-mal">
                         <p style="margin: 10px;">Malicious connections</p>
                     </div>
                     <div id="dynamicMaliciousTemplate"></div>
@@ -103,7 +121,7 @@
             <div>
             <div class="box-container">
                 <div class="box-chain">
-                    <div class="box" style="background-color: #edd040;">
+                    <div class="flags-box-sus">
                         <p style="margin: 10px;">Unknown connections</p>
                     </div>
                     <div id="dynamicUnknownTemplate"></div>
@@ -115,27 +133,15 @@
         <!-- --------------- -->
 
         <div class="divider"></div>
-            <span class="malicious">WARNING these flags are in development and could be completley incorrect! They are only provided as information!</span>
-            <h1>Dev flags</h1>
+            <h1>Static Analysis Results</h1>
             <div class="box-container">
                 <div class="box-chain">
-                    <div class="box" style="background-color: #000000;">
-                        <p style="margin: 10px;">DEV FLAGS</p>
+                    <div class="flags-box-mal-1">
                     </div>
-                    <div id="devFlagTemplate">
+                    <div id="staticMaliciousTemplate"></div>
                     </div>
                 </div>
             <div>
-        </div>
-
-        <div class="contents-bar">
-            <ul> <!--Axle make the navbar work plz-->
-                <li>File info</li>
-                <li>Static analysis</li>
-                <li>Network analysis</li>
-                <li>File operations</li>
-                <li>Dev flags</li>
-            </ul>
         </div>
     <% } %>
     <script src="reportScript.js"></script>

@@ -1,7 +1,30 @@
+:root {
+    --box-boarder: 1px solid #e5e9f076;;
+}
+
 body {
-	margin: 10px;
-    background-color: #1f2937;
-    font-family: Arial, sans-serif;
+  background-color: #2e3440;
+  font-family: "Inter", sans-serif;
+  margin: 10px;
+  padding: 0;
+  height: 100vh; /* we set page size here since its the body - this will also affect stuff like title - it also helps with footer calc */
+}
+
+.static-ol {
+    margin-right: 50px; /* pushing core */
+}
+.static-ol a {
+    font-size: 18px;
+}
+.list-item {
+    font-size: 16px;
+
+    text-decoration: none;
+    list-style: disc;
+}
+
+.flags-box-mal-1 p {
+    font-size: 16px;
 }
 
 body * {
@@ -24,13 +47,18 @@ h1 {
 }
 
 .columns {
-	margin: 20px 0;
+	margin: 1px 0;
 }
+
+
 
 .column {
 	margin: 10px;
 }
-
+.result-text-area-div {
+    margin: 10px;
+    font-size: 16px;
+}
 .column p {
 	margin: 0;
 }
@@ -38,19 +66,49 @@ h1 {
 .box {
 	width: calc(100% - 300px);
 	height: 70px;
-	border: 1px solid #ccc;
+	border: var(--box-boarder);
 	display: flex;
 	align-items: center;
     margin-left: 20px;
 }
+.flags-box-sus {
+	width: calc(100% - 300px);
+	height: 70px;
+	border: var(--box-boarder);
+	display: flex;
+	align-items: center;
+    margin-left: 20px;
+    background-color: #ebcb8b;
+}
+
+.flags-box-mal {
+    width: calc(100% - 300px);
+	height: 70px;
+	border: var(--box-boarder);
+	display: flex;
+	align-items: center;
+    background-color: #bf616a;
+    margin-left: 20px;
+}
+
+
+.flags-box-mal-1 {
+    width: calc(100em - 50em);
+	height: inherit;
+    border: 6px solid;
+    border-style: solid;
+    border-image: linear-gradient(to right, #bf616a, #e13142, #bf616a) 1;
+    display: flex;
+    background-color: #3b4252;
+    
+}
 
 .box-container {
-	margin: 20px 0;
-    margin-bottom: 20px;
+    margin-bottom: 2px;
 }
 
 .box-chain .box:first-child {
-	border-top: 1px solid #ccc;
+	border-top: var(--box-boarder);
 }
 
 
@@ -58,22 +116,28 @@ h1 {
 	margin: 10px;
 }
 
+.sylus-code {
+    color: blue;
+}
+
 .malicious {
-    background-color: #e63232;
-    color: #fff;
+    color: #bf616a;
+    text-shadow: #000000bd 1px 1px 2px;
+    font-size: 18px;
+    font-weight: bold;
     padding: 2px 5px;
     border-radius: 2px;
 }
 
 .suspicious {
-    background-color: #d9c63a;
+    background-color: #ebcb8b;
     color: #fff;
     padding: 2px 5px;
     border-radius: 2px;
 }
 
 .safe {
-    background-color: #50b322;
+    background-color: #a3be8c;
     color: #fff;
     padding: 2px 5px;
     border-radius: 2px;
@@ -87,7 +151,7 @@ h1 {
     right: 0;
     width: 200px;
     padding: 10px;
-    border-left: 1px solid #ccc;
+    border-left: var(--box-boarder);
 }
 
 .contents-bar ul {
